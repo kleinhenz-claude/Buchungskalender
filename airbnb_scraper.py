@@ -101,10 +101,11 @@ def extract_listings(page):
             } catch(_) {}
         });
 
-        // Duplikate entfernen
+        // Duplikate entfernen — nach Room-ID, nicht voller URL
         const seen = new Set();
         return results.filter(r => {
-            const k = r.url || r.titel;
+            const roomId = (r.url || '').match(/\/rooms\/(\d+)/)?.[1];
+            const k = roomId || r.url || r.titel;
             if (seen.has(k)) return false;
             seen.add(k); return true;
         });

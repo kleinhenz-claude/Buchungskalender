@@ -500,7 +500,14 @@ function updateStats(rows) {
 }
 
 function loadRows(raw) {
-  allRows = raw.map(normalizeRow);
+  const seen = new Set();
+  const deduped = raw.filter(r => {
+    const m = (r.URL || '').match(/\/rooms\/(\d+)/);
+    const k = m ? m[1] : (r.URL || r.Titel);
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+  allRows = deduped.map(normalizeRow);
 }
 
 initMap();
