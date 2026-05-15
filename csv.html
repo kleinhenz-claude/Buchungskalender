@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airbnb Ergebnisse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F2EC;
+  --surface: #FDFCFA;
+  --surface2: #EDEBE4;
+  --accent: #8B5E3C;
+  --accent-light: #C4956A;
+  --text: #1C1A16;
+  --text-muted: #7A7469;
+  --text-faint: #B0A99F;
+  --border: rgba(28,26,22,0.1);
+  --radius: 14px;
+  --radius-sm: 7px;
+  --free-bg: #E8EDE5;
+  --free-color: #3B6134;
+  --free-border: #7AAE74;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+.hero {
+  background: #1C1A16;
+  color: var(--bg);
+  padding: 3rem 2.5rem 2.75rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-orb1 {
+  position: absolute; top: -80px; right: -80px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,149,106,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-orb2 {
+  position: absolute; bottom: -50px; left: 60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,149,106,0.09) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  margin-bottom: 0.6rem;
+  font-weight: 400;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.08;
+  color: var(--bg);
+  margin-bottom: 0.4rem;
+}
+.hero-sub {
+  font-size: 13px;
+  color: rgba(245,242,236,0.45);
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 2.25rem;
+}
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 700px;
+}
+.hero-stat {
+  background: rgba(255,255,255,0.03);
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+.hero-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+.hero-stat-label {
+  font-size: 11px;
+  color: rgba(245,242,236,0.42);
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+.main {
+  padding: 2.5rem 2.5rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* FILTER BAR */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-bar input, .filter-bar select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.filter-bar input:focus, .filter-bar select:focus {
+  border-color: var(--accent-light);
+}
+.filter-bar input { min-width: 220px; }
+.result-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* CARDS */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 3rem;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.3;
+}
+.card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 2px;
+}
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  border: 1px solid;
+}
+.pill-price  { background: #FEF0E7; color: #7A3E1A; border-color: #D4956A; }
+.pill-total  { background: var(--surface2); color: var(--text-muted); border-color: var(--border); }
+.pill-rating { background: #EEF7EC; color: #2D5A27; border-color: #7AAE74; }
+.pill-super  { background: #EEF3FE; color: #1A3A8B; border-color: #7A9ADE; }
+.card-link {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  margin-top: auto;
+  display: inline-block;
+  font-weight: 400;
+}
+.card-link:hover { text-decoration: underline; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; margin-bottom: 3rem; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 14px 10px 0;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th:hover { color: var(--accent); }
+th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+th.sorted .sort-arrow { opacity: 1; color: var(--accent-light); }
+td {
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+  max-width: 280px;
+}
+td a { color: var(--accent); text-decoration: none; font-size: 12px; }
+td a:hover { text-decoration: underline; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(196,149,106,0.05); }
+
+/* EMPTY / ERROR */
+.state-box {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.state-box .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+
+/* VIEW TOGGLE */
+.view-toggle {
+  display: flex;
+  gap: 6px;
+}
+.view-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+.view-btn.active {
+  background: var(--accent-light);
+  color: #fff;
+  border-color: var(--accent-light);
+}
+
+footer {
+  background: #1C1A16;
+  color: rgba(245,242,236,0.32);
+  text-align: center;
+  font-size: 12px;
+  padding: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 2rem 1.25rem 2rem; }
+  .main { padding: 1.5rem 1.25rem 3rem; }
+  .hero-stats { grid-template-columns: repeat(2,1fr); }
+  .hero-stat-val { font-size: 1.6rem; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .filter-bar input { min-width: unset; width: 100%; }
+  .result-count { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <p class="hero-eyebrow">Airbnb · Scraper-Ergebnisse</p>
+  <h1>Inserate-Übersicht</h1>
+  <p class="hero-sub" id="hero-sub">Lade Daten…</p>
+  <div class="hero-stats" id="hero-stats"></div>
+</header>
+
+<main class="main">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:12px;">
+    <h2 class="section-title" style="margin-bottom:0;flex:1;">Ergebnisse</h2>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-cards" onclick="setView('cards')">Karten</button>
+      <button class="view-btn" id="btn-table" onclick="setView('table')">Tabelle</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <input type="search" id="search" placeholder="Suchen (Titel, Ort …)">
+    <select id="sort-select">
+      <option value="">Sortieren …</option>
+      <option value="preis-asc">Preis ↑</option>
+      <option value="preis-desc">Preis ↓</option>
+      <option value="rating-desc">Bewertung ↓</option>
+      <option value="reviews-desc">Rezensionen ↓</option>
+    </select>
+    <select id="superhost-filter">
+      <option value="">Alle</option>
+      <option value="ja">Nur Superhost</option>
+    </select>
+    <span class="result-count" id="result-count"></span>
+  </div>
+
+  <div id="cards-view" class="cards-grid"></div>
+
+  <div id="table-view" class="table-wrap" style="display:none;">
+    <table>
+      <thead>
+        <tr id="table-head"></tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div id="state-box" class="state-box" style="display:none;"></div>
+
+</main>
+
+<footer id="footer">Airbnb-Scraper · Scharnhäusle 10</footer>
+
+<script>
+const CSV_FILE = 'airbnb_ergebnisse.csv';
+let allRows = [];
+let currentView = 'cards';
+let sortCol = null, sortDir = 1;
+
+async function loadCSV() {
+  const res = await fetch(CSV_FILE);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = splitCSVLine(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(l => {
+    const vals = splitCSVLine(l);
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (vals[i] ?? '').trim());
+    return obj;
+  });
+}
+
+function splitCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else cur += c;
+  }
+  result.push(cur);
+  return result;
+}
+
+function parsePrice(str) {
+  const m = str.replace(/\./g, '').replace(',', '.').match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function filtered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const sh = document.getElementById('superhost-filter').value;
+  return allRows.filter(r => {
+    if (q && !Object.values(r).join(' ').toLowerCase().includes(q)) return false;
+    if (sh === 'ja' && r.Superhost?.toLowerCase() !== 'ja') return false;
+    return true;
+  });
+}
+
+function sorted(rows) {
+  const sel = document.getElementById('sort-select').value;
+  if (!sel) return rows;
+  return [...rows].sort((a, b) => {
+    if (sel === 'preis-asc' || sel === 'preis-desc') {
+      const pa = parsePrice(a.Preis_pro_Nacht) ?? Infinity;
+      const pb = parsePrice(b.Preis_pro_Nacht) ?? Infinity;
+      return sel === 'preis-asc' ? pa - pb : pb - pa;
+    }
+    if (sel === 'rating-desc') {
+      const ra = parseFloat(a.Bewertung?.replace(',', '.')) || 0;
+      const rb = parseFloat(b.Bewertung?.replace(',', '.')) || 0;
+      return rb - ra;
+    }
+    if (sel === 'reviews-desc') {
+      return (parseInt(b.Anzahl_Bewertungen) || 0) - (parseInt(a.Anzahl_Bewertungen) || 0);
+    }
+    return 0;
+  });
+}
+
+function render() {
+  const rows = sorted(filtered());
+  document.getElementById('result-count').textContent = rows.length + ' Inserat' + (rows.length !== 1 ? 'e' : '');
+
+  if (!rows.length) {
+    document.getElementById('cards-view').innerHTML = '';
+    document.getElementById('table-body').innerHTML = '';
+    showState('Keine Ergebnisse gefunden.');
+    return;
+  }
+  hideState();
+
+  if (currentView === 'cards') renderCards(rows);
+  else renderTable(rows);
+}
+
+function renderCards(rows) {
+  document.getElementById('cards-view').innerHTML = rows.map(r => {
+    const superhost = r.Superhost?.toLowerCase() === 'ja'
+      ? `<span class="pill pill-super">Superhost</span>` : '';
+    const rating = r.Bewertung
+      ? `<span class="pill pill-rating">★ ${r.Bewertung}${r.Anzahl_Bewertungen ? ' ('+r.Anzahl_Bewertungen+')' : ''}</span>` : '';
+    const preis = r.Preis_pro_Nacht
+      ? `<span class="pill pill-price">${r.Preis_pro_Nacht} / Nacht</span>` : '';
+    const total = r.Gesamtpreis && r.Gesamtpreis !== r.Preis_pro_Nacht
+      ? `<span class="pill pill-total">Gesamt: ${r.Gesamtpreis}</span>` : '';
+    const link = r.URL ? `<a class="card-link" href="${r.URL}" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>` : '';
+    return `<div class="card">
+      <div class="card-title">${esc(r.Titel || '–')}</div>
+      ${r.Unterzeile ? `<div class="card-sub">${esc(r.Unterzeile)}</div>` : ''}
+      <div class="card-meta">${preis}${total}${rating}${superhost}</div>
+      ${link}
+    </div>`;
+  }).join('');
+}
+
+function renderTable(rows) {
+  const cols = ['Titel','Unterzeile','Preis_pro_Nacht','Gesamtpreis','Bewertung','Anzahl_Bewertungen','Superhost','URL'];
+  const labels = ['Titel','Unterzeile','Preis/Nacht','Gesamt','Bewertung','Rezensionen','Superhost','Link'];
+  document.getElementById('table-head').innerHTML = cols.map((c, i) =>
+    `<th>${labels[i]}</th>`).join('');
+
+  document.getElementById('table-body').innerHTML = rows.map(r =>
+    `<tr>${cols.map(c => {
+      if (c === 'URL') return `<td>${r[c] ? `<a href="${r[c]}" target="_blank" rel="noopener">Link</a>` : '–'}</td>`;
+      return `<td>${esc(r[c] || '–')}</td>`;
+    }).join('')}</tr>`
+  ).join('');
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('cards-view').style.display = v === 'cards' ? 'grid' : 'none';
+  document.getElementById('table-view').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('btn-cards').classList.toggle('active', v === 'cards');
+  document.getElementById('btn-table').classList.toggle('active', v === 'table');
+  render();
+}
+
+function showState(msg) {
+  const box = document.getElementById('state-box');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="icon">📂</div>${msg}`;
+  document.getElementById('cards-view').style.display = 'none';
+  document.getElementById('table-view').style.display = 'none';
+}
+function hideState() {
+  document.getElementById('state-box').style.display = 'none';
+  document.getElementById('cards-view').style.display = currentView === 'cards' ? 'grid' : 'none';
+  document.getElementById('table-view').style.display = currentView === 'table' ? 'block' : 'none';
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateStats(rows) {
+  const withPrice = rows.map(r => parsePrice(r.Preis_pro_Nacht)).filter(p => p !== null);
+  const avgPrice = withPrice.length ? Math.round(withPrice.reduce((a,b)=>a+b,0)/withPrice.length) : null;
+  const superhosts = rows.filter(r => r.Superhost?.toLowerCase() === 'ja').length;
+  const withRating = rows.map(r => parseFloat(r.Bewertung?.replace(',','.'))).filter(v => !isNaN(v));
+  const avgRating = withRating.length ? (withRating.reduce((a,b)=>a+b,0)/withRating.length).toFixed(1) : null;
+
+  document.getElementById('hero-stats').innerHTML = [
+    [rows.length, 'Inserate'],
+    [avgPrice !== null ? avgPrice + ' €' : '–', 'Ø Preis/Nacht'],
+    [avgRating ?? '–', 'Ø Bewertung'],
+    [superhosts, 'Superhosts'],
+  ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
+}
+
+(async () => {
+  try {
+    allRows = await loadCSV();
+    if (!allRows.length) {
+      document.getElementById('hero-sub').textContent = 'Noch keine Daten — Workflow ausführen um CSV zu befüllen.';
+      document.getElementById('hero-stats').innerHTML = '';
+      showState('Die CSV-Datei ist leer. Führe den Airbnb-Scraper-Workflow auf GitHub Actions aus.');
+      return;
+    }
+    const firstRow = allRows[0];
+    const ort = firstRow.Unterzeile || 'Ostfildern-Scharnhausen';
+    document.getElementById('hero-sub').textContent = `${allRows.length} Inserate · ${ort}`;
+    document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
+    updateStats(allRows);
+    render();
+    ['search','sort-select','superhost-filter'].forEach(id =>
+      document.getElementById(id).addEventListener('input', render));
+  } catch (e) {
+    document.getElementById('hero-sub').textContent = 'Fehler beim Laden der CSV.';
+    showState('Fehler: ' + e.message);
+  }
+})();
+</script>
+</body>
+</html>
