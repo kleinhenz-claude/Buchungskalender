@@ -25,10 +25,10 @@ jobs:
 
     steps:
       - name: Repository laden
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Python einrichten
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -46,7 +46,7 @@ jobs:
           AIRBNB_CHECKOUT: ${{ github.event.inputs.checkout }}
 
       - name: CSV als Artefakt hochladen
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: airbnb-ergebnisse
           path: airbnb_ergebnisse.csv
