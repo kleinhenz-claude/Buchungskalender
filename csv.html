@@ -21,9 +21,6 @@
   --border: rgba(28,26,22,0.1);
   --radius: 14px;
   --radius-sm: 7px;
-  --free-bg: #E8EDE5;
-  --free-color: #3B6134;
-  --free-border: #7AAE74;
 }
 
 body {
@@ -128,7 +125,6 @@ body {
   background: var(--border);
 }
 
-/* FILTER BAR */
 .filter-bar {
   display: flex;
   gap: 12px;
@@ -147,17 +143,10 @@ body {
   outline: none;
   transition: border-color 0.2s;
 }
-.filter-bar input:focus, .filter-bar select:focus {
-  border-color: var(--accent-light);
-}
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent-light); }
 .filter-bar input { min-width: 220px; }
-.result-count {
-  margin-left: auto;
-  font-size: 12px;
-  color: var(--text-muted);
-}
+.result-count { margin-left: auto; font-size: 12px; color: var(--text-muted); }
 
-/* CARDS */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -174,149 +163,54 @@ body {
   gap: 10px;
   transition: box-shadow 0.25s, transform 0.25s;
 }
-.card:hover {
-  box-shadow: 0 6px 28px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
-}
-.card-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--text);
-  line-height: 1.3;
-}
-.card-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.card-meta {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 2px;
-}
-.pill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 400;
-  border: 1px solid;
-}
+.card:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.card-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 400; color: var(--text); line-height: 1.3; }
+.card-sub { font-size: 12px; color: var(--text-muted); }
+.card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 400; border: 1px solid; }
 .pill-price  { background: #FEF0E7; color: #7A3E1A; border-color: #D4956A; }
-.pill-total  { background: var(--surface2); color: var(--text-muted); border-color: var(--border); }
 .pill-rating { background: #EEF7EC; color: #2D5A27; border-color: #7AAE74; }
 .pill-super  { background: #EEF3FE; color: #1A3A8B; border-color: #7A9ADE; }
-.card-link {
-  font-size: 12px;
-  color: var(--accent);
-  text-decoration: none;
-  margin-top: auto;
-  display: inline-block;
-  font-weight: 400;
-}
+.pill-other  { background: var(--surface2); color: var(--text-muted); border-color: var(--border); }
+.card-link { font-size: 12px; color: var(--accent); text-decoration: none; margin-top: auto; display: inline-block; font-weight: 400; }
 .card-link:hover { text-decoration: underline; }
 
-/* TABLE */
 .table-wrap { overflow-x: auto; margin-bottom: 3rem; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead tr { border-bottom: 1px solid var(--border); }
-th {
-  text-align: left;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  padding: 0 14px 10px 0;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-th:hover { color: var(--accent); }
-th .sort-arrow { margin-left: 4px; opacity: 0.4; }
-th.sorted .sort-arrow { opacity: 1; color: var(--accent-light); }
-td {
-  padding: 10px 14px 10px 0;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
-  vertical-align: middle;
-  max-width: 280px;
-}
+th { text-align: left; font-size: 11px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-faint); padding: 0 14px 10px 0; white-space: nowrap; }
+td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; max-width: 280px; }
 td a { color: var(--accent); text-decoration: none; font-size: 12px; }
 td a:hover { text-decoration: underline; }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: rgba(196,149,106,0.05); }
 
-/* EMPTY / ERROR */
-.state-box {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  font-size: 14px;
-}
+.state-box { text-align: center; padding: 4rem 2rem; color: var(--text-muted); font-size: 14px; }
 .state-box .icon { font-size: 2.5rem; margin-bottom: 1rem; }
 
-/* VIEW TOGGLE */
-.view-toggle {
-  display: flex;
-  gap: 6px;
-}
+.view-toggle { display: flex; gap: 6px; }
 .view-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 7px 14px;
-  font-size: 12px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-family: 'DM Sans', sans-serif;
-  transition: background 0.15s, color 0.15s;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif; transition: background 0.15s, color 0.15s;
 }
-.view-btn.active {
-  background: var(--accent-light);
-  color: #fff;
-  border-color: var(--accent-light);
-}
+.view-btn.active { background: var(--accent-light); color: #fff; border-color: var(--accent-light); }
 
-/* UPLOAD */
 .upload-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--surface);
-  border: 1px dashed var(--accent-light);
-  border-radius: var(--radius);
-  padding: 1rem 1.3rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; background: var(--surface);
+  border: 1px dashed var(--accent-light); border-radius: var(--radius);
+  padding: 1rem 1.3rem; margin-bottom: 1.5rem; flex-wrap: wrap;
 }
 .upload-bar label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  background: var(--accent-light);
-  color: #fff;
-  border-radius: var(--radius-sm);
-  padding: 7px 16px;
-  font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
-  transition: opacity 0.15s;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  background: var(--accent-light); color: #fff; border-radius: var(--radius-sm);
+  padding: 7px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s;
 }
 .upload-bar label:hover { opacity: 0.85; }
 .upload-bar input[type=file] { display: none; }
 .upload-hint { font-size: 12px; color: var(--text-muted); }
 
-footer {
-  background: #1C1A16;
-  color: rgba(245,242,236,0.32);
-  text-align: center;
-  font-size: 12px;
-  padding: 1.5rem;
-  letter-spacing: 0.05em;
-}
+footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center; font-size: 12px; padding: 1.5rem; letter-spacing: 0.05em; }
 
 @media (max-width: 640px) {
   .hero { padding: 2rem 1.25rem 2rem; }
@@ -347,11 +241,11 @@ footer {
       &#8593; CSV laden
       <input type="file" id="file-input" accept=".csv">
     </label>
-    <span class="upload-hint" id="upload-hint">Eigene <code>airbnb_ergebnisse.csv</code> hochladen — oder Seite lädt die Datei aus dem Repository automatisch.</span>
+    <span class="upload-hint" id="upload-hint">Eigene <code>airbnb_ergebnisse.csv</code> hochladen — oder Seite lädt sie automatisch.</span>
   </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:12px;">
-    <h2 class="section-title" style="margin-bottom:0;flex:1;">Ergebnisse</h2>
+    <h2 class="section-title" style="margin-bottom:0;flex:1;">Ergebnisse · Ostfildern</h2>
     <div class="view-toggle">
       <button class="view-btn active" id="btn-cards" onclick="setView('cards')">Karten</button>
       <button class="view-btn" id="btn-table" onclick="setView('table')">Tabelle</button>
@@ -359,7 +253,7 @@ footer {
   </div>
 
   <div class="filter-bar">
-    <input type="search" id="search" placeholder="Suchen (Titel, Ort …)">
+    <input type="search" id="search" placeholder="Suchen …">
     <select id="sort-select">
       <option value="">Sortieren …</option>
       <option value="preis-asc">Preis ↑</option>
@@ -377,9 +271,7 @@ footer {
 
   <div id="table-view" class="table-wrap" style="display:none;">
     <table>
-      <thead>
-        <tr id="table-head"></tr>
-      </thead>
+      <thead><tr id="table-head"></tr></thead>
       <tbody id="table-body"></tbody>
     </table>
   </div>
@@ -392,8 +284,7 @@ footer {
 
 <script>
 const CSV_FILE = 'airbnb_ergebnisse.csv';
-let allRows = [];
-let currentView = 'cards';
+let allRows = [], currentView = 'cards';
 
 async function loadCSV() {
   const res = await fetch(CSV_FILE);
@@ -433,14 +324,14 @@ function parseCSV(raw) {
   const headers = records[0];
   return records.slice(1).map(vals => {
     const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = (vals[i] ?? '').trim());
+    headers.forEach((h, idx) => obj[h.trim()] = (vals[idx] ?? '').trim());
     return obj;
   });
 }
 
-// Extrahiert strukturierte Felder aus dem Roh-Scraper-Format
 function normalizeRow(r) {
-  const lines = r.Preis_pro_Nacht.split('\n').map(l => l.trim()).filter(l => l);
+  const raw = (r.Preis_pro_Nacht || '');
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
   const badge = lines[0] || '';
   const superhost = badge === 'Superhost';
   const locLine = lines.find(l =>
@@ -450,10 +341,10 @@ function normalizeRow(r) {
   const name = (locIdx >= 0 && lines[locIdx + 1]) ? lines[locIdx + 1] : r.Titel;
   const cityM = locLine.match(/ in (.+)$/i);
   const city = cityM ? cityM[1].trim() : '';
-  const preis = r.Gesamtpreis.replace(/Gesamtpreis/g, '').replace(/ /g, ' ').trim();
+  const preis = (r.Gesamtpreis || '').replace(/Gesamtpreis/g, '').replace(/ /g, ' ').trim();
   return {
     ...r,
-    _name: name,
+    _name: name || '–',
     _location: locLine,
     _city: city,
     _superhost: superhost,
@@ -465,8 +356,8 @@ function normalizeRow(r) {
 
 function parsePrice(str) {
   if (!str) return null;
-  const m = str.replace(/\./g, '').replace(',', '.').match(/[\d]+/);
-  return m ? parseFloat(m[0]) : null;
+  const m = str.replace(/[^\d]/g, '');
+  return m ? parseFloat(m) : null;
 }
 
 function filtered() {
@@ -476,7 +367,7 @@ function filtered() {
     if (!r._isOstfildern) return false;
     if (sh === 'ja' && !r._superhost) return false;
     if (q) {
-      const hay = [r._name, r._location, r._badge, r._preis, r.URL].join(' ').toLowerCase();
+      const hay = [r._name, r._location, r._badge, r._preis].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -515,12 +406,12 @@ function render() {
 function renderCards(rows) {
   document.getElementById('cards-view').innerHTML = rows.map(r => {
     const badgeCls = r._superhost ? 'pill-super' :
-      r._badge.includes('Favorit') ? 'pill-rating' : 'pill-total';
+      r._badge.includes('Favorit') ? 'pill-rating' : 'pill-other';
     const badge = r._badge ? `<span class="pill ${badgeCls}">${esc(r._badge)}</span>` : '';
     const preis = r._preis ? `<span class="pill pill-price">${esc(r._preis)}</span>` : '';
     const link = r.URL ? `<a class="card-link" href="${esc(r.URL)}" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>` : '';
     return `<div class="card">
-      <div class="card-title">${esc(r._name || '–')}</div>
+      <div class="card-title">${esc(r._name)}</div>
       <div class="card-sub">${esc(r._location)}</div>
       <div class="card-meta">${preis}${badge}</div>
       ${link}
@@ -532,7 +423,7 @@ function renderTable(rows) {
   document.getElementById('table-head').innerHTML =
     ['Objekt','Standort','Preis','Superhost','Link'].map(l => `<th>${l}</th>`).join('');
   document.getElementById('table-body').innerHTML = rows.map(r => `<tr>
-    <td>${esc(r._name || '–')}</td>
+    <td>${esc(r._name)}</td>
     <td>${esc(r._location)}</td>
     <td>${esc(r._preis || '–')}</td>
     <td>${r._superhost ? '✓ Superhost' : '–'}</td>
@@ -551,7 +442,7 @@ function setView(v) {
 
 function showState(msg) {
   document.getElementById('state-box').style.display = 'block';
-  document.getElementById('state-box').innerHTML = `<div class="icon">📂</div>${msg}`;
+  document.getElementById('state-box').innerHTML = `<div class="icon">&#128193;</div>${msg}`;
   document.getElementById('cards-view').style.display = 'none';
   document.getElementById('table-view').style.display = 'none';
 }
@@ -573,13 +464,13 @@ function updateStats(rows) {
   document.getElementById('hero-stats').innerHTML = [
     [ost.length, 'Inserate Ostfildern'],
     [rows.length, 'Gesamt geladen'],
-    [avgPrice !== null ? avgPrice + ' €' : '–', 'Ø Gesamtpreis'],
+    [avgPrice !== null ? avgPrice + ' €' : '–', 'Ø Gesamtpreis'],
     [superhosts, 'Superhosts'],
   ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
 }
 
-function processRows(raw) {
-  return raw.map(normalizeRow);
+function loadRows(raw) {
+  allRows = raw.map(normalizeRow);
 }
 
 ['search','sort-select','superhost-filter'].forEach(id =>
@@ -590,11 +481,11 @@ document.getElementById('file-input').addEventListener('change', e => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    allRows = processRows(parseCSV(ev.target.result));
+    loadRows(parseCSV(ev.target.result));
     const ost = allRows.filter(r => r._isOstfildern).length;
     document.getElementById('upload-hint').textContent =
-      `Geladen: ${file.name} · ${allRows.length} gesamt · ${ost} in Ostfildern`;
-    document.getElementById('hero-sub').textContent = `${file.name}`;
+      `${file.name} · ${allRows.length} gesamt · ${ost} in Ostfildern`;
+    document.getElementById('hero-sub').textContent = file.name;
     updateStats(allRows);
     render();
   };
@@ -607,10 +498,10 @@ document.getElementById('file-input').addEventListener('change', e => {
     if (!raw.length) {
       document.getElementById('hero-sub').textContent = 'CSV leer — Workflow ausführen oder Datei hochladen.';
       document.getElementById('hero-stats').innerHTML = '';
-      showState(`<div class="icon">📭</div><strong>CSV ist leer.</strong><br><br>Airbnb-Scraper-Workflow starten oder lokale CSV hochladen.`);
+      showState('<strong>CSV ist leer.</strong><br><br>Airbnb-Scraper-Workflow starten oder lokale CSV hochladen.');
       return;
     }
-    allRows = processRows(raw);
+    loadRows(raw);
     const ost = allRows.filter(r => r._isOstfildern).length;
     document.getElementById('hero-sub').textContent = `${ost} Inserate in Ostfildern · ${allRows.length} gesamt`;
     document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
@@ -618,231 +509,7 @@ document.getElementById('file-input').addEventListener('change', e => {
     render();
   } catch (e) {
     document.getElementById('hero-sub').textContent = 'Fehler beim Laden.';
-    showState(`<div class="icon">⚠️</div>Fehler: ${e.message}`);
-  }
-})();
-</script>
-
-async function loadCSV() {
-  const res = await fetch(CSV_FILE);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
-  return parseCSV(text);
-}
-
-function parseCSV(raw) {
-  // BOM entfernen
-  const text = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
-  // RFC 4180-konformer Parser (unterstützt mehrzeilige Felder)
-  const records = [];
-  let i = 0, n = text.length;
-
-  while (i < n) {
-    const fields = [];
-    while (true) {
-      let field = '';
-      if (text[i] === '"') {
-        i++; // öffnendes "
-        while (i < n) {
-          if (text[i] === '"') {
-            if (text[i + 1] === '"') { field += '"'; i += 2; } // escaped quote
-            else { i++; break; } // schließendes "
-          } else { field += text[i++]; }
-        }
-      } else {
-        while (i < n && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r') {
-          field += text[i++];
-        }
-      }
-      fields.push(field);
-      if (i >= n || text[i] === '\n' || text[i] === '\r') break;
-      i++; // Komma überspringen
-    }
-    // \r\n oder \n überspringen
-    if (text[i] === '\r') i++;
-    if (text[i] === '\n') i++;
-    if (fields.length > 1 || fields[0] !== '') records.push(fields);
-  }
-
-  if (records.length < 2) return [];
-  const headers = records[0];
-  return records.slice(1).map(vals => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = (vals[i] ?? '').trim());
-    return obj;
-  });
-}
-
-function parsePrice(str) {
-  const m = str.replace(/\./g, '').replace(',', '.').match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : null;
-}
-
-function filtered() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const sh = document.getElementById('superhost-filter').value;
-  return allRows.filter(r => {
-    if (q && !Object.values(r).join(' ').toLowerCase().includes(q)) return false;
-    if (sh === 'ja' && r.Superhost?.toLowerCase() !== 'ja') return false;
-    return true;
-  });
-}
-
-function sorted(rows) {
-  const sel = document.getElementById('sort-select').value;
-  if (!sel) return rows;
-  return [...rows].sort((a, b) => {
-    if (sel === 'preis-asc' || sel === 'preis-desc') {
-      const pa = parsePrice(a.Preis_pro_Nacht) ?? Infinity;
-      const pb = parsePrice(b.Preis_pro_Nacht) ?? Infinity;
-      return sel === 'preis-asc' ? pa - pb : pb - pa;
-    }
-    if (sel === 'rating-desc') {
-      const ra = parseFloat(a.Bewertung?.replace(',', '.')) || 0;
-      const rb = parseFloat(b.Bewertung?.replace(',', '.')) || 0;
-      return rb - ra;
-    }
-    if (sel === 'reviews-desc') {
-      return (parseInt(b.Anzahl_Bewertungen) || 0) - (parseInt(a.Anzahl_Bewertungen) || 0);
-    }
-    return 0;
-  });
-}
-
-function render() {
-  const rows = sorted(filtered());
-  document.getElementById('result-count').textContent = rows.length + ' Inserat' + (rows.length !== 1 ? 'e' : '');
-
-  if (!rows.length) {
-    document.getElementById('cards-view').innerHTML = '';
-    document.getElementById('table-body').innerHTML = '';
-    showState('Keine Ergebnisse gefunden.');
-    return;
-  }
-  hideState();
-
-  if (currentView === 'cards') renderCards(rows);
-  else renderTable(rows);
-}
-
-function renderCards(rows) {
-  document.getElementById('cards-view').innerHTML = rows.map(r => {
-    const superhost = r.Superhost?.toLowerCase() === 'ja'
-      ? `<span class="pill pill-super">Superhost</span>` : '';
-    const rating = r.Bewertung
-      ? `<span class="pill pill-rating">★ ${r.Bewertung}${r.Anzahl_Bewertungen ? ' ('+r.Anzahl_Bewertungen+')' : ''}</span>` : '';
-    const preis = r.Preis_pro_Nacht
-      ? `<span class="pill pill-price">${r.Preis_pro_Nacht} / Nacht</span>` : '';
-    const total = r.Gesamtpreis && r.Gesamtpreis !== r.Preis_pro_Nacht
-      ? `<span class="pill pill-total">Gesamt: ${r.Gesamtpreis}</span>` : '';
-    const link = r.URL ? `<a class="card-link" href="${r.URL}" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>` : '';
-    return `<div class="card">
-      <div class="card-title">${esc(r.Titel || '–')}</div>
-      ${r.Unterzeile ? `<div class="card-sub">${esc(r.Unterzeile)}</div>` : ''}
-      <div class="card-meta">${preis}${total}${rating}${superhost}</div>
-      ${link}
-    </div>`;
-  }).join('');
-}
-
-function renderTable(rows) {
-  const cols = ['Titel','Unterzeile','Preis_pro_Nacht','Gesamtpreis','Bewertung','Anzahl_Bewertungen','Superhost','URL'];
-  const labels = ['Titel','Unterzeile','Preis/Nacht','Gesamt','Bewertung','Rezensionen','Superhost','Link'];
-  document.getElementById('table-head').innerHTML = cols.map((c, i) =>
-    `<th>${labels[i]}</th>`).join('');
-
-  document.getElementById('table-body').innerHTML = rows.map(r =>
-    `<tr>${cols.map(c => {
-      if (c === 'URL') return `<td>${r[c] ? `<a href="${r[c]}" target="_blank" rel="noopener">Link</a>` : '–'}</td>`;
-      return `<td>${esc(r[c] || '–')}</td>`;
-    }).join('')}</tr>`
-  ).join('');
-}
-
-function setView(v) {
-  currentView = v;
-  document.getElementById('cards-view').style.display = v === 'cards' ? 'grid' : 'none';
-  document.getElementById('table-view').style.display = v === 'table' ? 'block' : 'none';
-  document.getElementById('btn-cards').classList.toggle('active', v === 'cards');
-  document.getElementById('btn-table').classList.toggle('active', v === 'table');
-  render();
-}
-
-function showState(msg) {
-  const box = document.getElementById('state-box');
-  box.style.display = 'block';
-  box.innerHTML = `<div class="icon">📂</div>${msg}`;
-  document.getElementById('cards-view').style.display = 'none';
-  document.getElementById('table-view').style.display = 'none';
-}
-function hideState() {
-  document.getElementById('state-box').style.display = 'none';
-  document.getElementById('cards-view').style.display = currentView === 'cards' ? 'grid' : 'none';
-  document.getElementById('table-view').style.display = currentView === 'table' ? 'block' : 'none';
-}
-
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function updateStats(rows) {
-  const withPrice = rows.map(r => parsePrice(r.Preis_pro_Nacht)).filter(p => p !== null);
-  const avgPrice = withPrice.length ? Math.round(withPrice.reduce((a,b)=>a+b,0)/withPrice.length) : null;
-  const superhosts = rows.filter(r => r.Superhost?.toLowerCase() === 'ja').length;
-  const withRating = rows.map(r => parseFloat(r.Bewertung?.replace(',','.'))).filter(v => !isNaN(v));
-  const avgRating = withRating.length ? (withRating.reduce((a,b)=>a+b,0)/withRating.length).toFixed(1) : null;
-
-  document.getElementById('hero-stats').innerHTML = [
-    [rows.length, 'Inserate'],
-    [avgPrice !== null ? avgPrice + ' €' : '–', 'Ø Preis/Nacht'],
-    [avgRating ?? '–', 'Ø Bewertung'],
-    [superhosts, 'Superhosts'],
-  ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
-}
-
-// Event-Listener immer registrieren (auch nach Datei-Upload nutzbar)
-['search','sort-select','superhost-filter'].forEach(id =>
-  document.getElementById(id).addEventListener('input', render));
-
-document.getElementById('file-input').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    allRows = parseCSV(ev.target.result);
-    document.getElementById('upload-hint').textContent =
-      `Geladen: ${file.name} · ${allRows.length} Inserat${allRows.length !== 1 ? 'e' : ''}`;
-    document.getElementById('hero-sub').textContent =
-      `${allRows.length} Inserate · ${file.name}`;
-    updateStats(allRows);
-    render();
-  };
-  reader.readAsText(file, 'utf-8');
-});
-
-(async () => {
-  try {
-    allRows = await loadCSV();
-    if (!allRows.length) {
-      document.getElementById('hero-sub').textContent = 'CSV geladen — noch keine Daten vorhanden.';
-      document.getElementById('hero-stats').innerHTML = '';
-      showState(`
-        <div class="icon">📭</div>
-        <strong>Die CSV-Datei ist leer.</strong><br><br>
-        Entweder den <strong>Airbnb-Scraper-Workflow</strong> auf GitHub Actions ausführen —<br>
-        oder oben eine lokale CSV-Datei hochladen.
-      `);
-      return;
-    }
-    const ort = allRows[0].Unterzeile || 'Ostfildern-Scharnhausen';
-    document.getElementById('hero-sub').textContent = `${allRows.length} Inserate · ${ort}`;
-    document.getElementById('footer').textContent =
-      `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
-    updateStats(allRows);
-    render();
-  } catch (e) {
-    document.getElementById('hero-sub').textContent = 'Fehler beim Laden der CSV.';
-    showState(`<div class="icon">⚠️</div>Fehler: ${e.message}`);
+    showState(`Fehler: ${e.message}`);
   }
 })();
 </script>
