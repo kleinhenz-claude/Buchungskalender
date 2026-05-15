@@ -273,6 +273,44 @@ tbody tr:hover td { background: rgba(196,149,106,0.05); }
 .type-week  { background:#EEF3FE; color:#1A3A8B; border-color:#7A9ADE; }
 .type-short { background:var(--surface2); color:var(--text-muted); border-color:var(--border); }
 
+/* ANALYSE */
+.analyse-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 3rem;
+}
+@media (max-width: 700px) { .analyse-grid { grid-template-columns: 1fr; } }
+.analyse-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.3rem;
+}
+.analyse-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+.bar-label { width: 32px; color: var(--text-muted); flex-shrink: 0; text-align: right; }
+.bar-label-wide { width: 70px; color: var(--text-muted); flex-shrink: 0; }
+.bar-track { flex: 1; background: var(--surface2); border-radius: 3px; height: 10px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; background: var(--accent-light); transition: width 0.4s; }
+.bar-fill.bar-peak { background: var(--accent); }
+.bar-val { width: 36px; color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
+
 /* FREE PERIODS */
 .free-section { margin-bottom: 2rem; }
 .free-grid {
@@ -349,6 +387,20 @@ footer {
   <section class="free-section">
     <h2 class="section-title">Freie Zeiträume (ab heute)</h2>
     <div class="free-grid" id="free-grid"></div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Buchungsanalyse</h2>
+    <div class="analyse-grid">
+      <div class="analyse-card">
+        <h3>Belegte Tage nach Wochentag</h3>
+        <div id="wd-bars"></div>
+      </div>
+      <div class="analyse-card">
+        <h3>Belegte Tage nach Monat</h3>
+        <div id="mo-bars"></div>
+      </div>
+    </div>
   </section>
 
 </main>
@@ -482,6 +534,38 @@ fg.innerHTML=fp.length?fp.map(p=>`
     <div class="free-card-dates">${fmt(p.s)} – ${fmt(p.e)}</div>
     <div class="free-card-nights">${p.n} freie Nacht${p.n!==1?'e':''}</div>
   </div>`).join(''):'<p style="color:var(--text-muted);font-size:13px;">Keine freien Zeiträume.</p>';
+
+// Analyse: Wochentage
+const wdCount=[0,0,0,0,0,0,0]; // Mo=0 … So=6
+for(const key of booked){
+  const[y,m,d]=key.split('-').map(Number);
+  let wd=new Date(y,m-1,d).getDay(); // 0=So
+  wd=wd===0?6:wd-1; // Mo=0 … So=6
+  wdCount[wd]++;
+}
+const wdMax=Math.max(...wdCount);
+document.getElementById('wd-bars').innerHTML=DN.map((n,i)=>`
+  <div class="bar-row">
+    <span class="bar-label">${n}</span>
+    <div class="bar-track"><div class="bar-fill${wdCount[i]===wdMax?' bar-peak':''}"
+      style="width:${wdMax?Math.round(wdCount[i]/wdMax*100):0}%"></div></div>
+    <span class="bar-val">${wdCount[i]} T.</span>
+  </div>`).join('');
+
+// Analyse: Monate
+const moCount=Array(12).fill(0);
+for(const key of booked){
+  const m=parseInt(key.split('-')[1],10)-1;
+  moCount[m]++;
+}
+const moMax=Math.max(...moCount);
+document.getElementById('mo-bars').innerHTML=MN.map((n,i)=>`
+  <div class="bar-row">
+    <span class="bar-label-wide">${n}</span>
+    <div class="bar-track"><div class="bar-fill${moCount[i]===moMax?' bar-peak':''}"
+      style="width:${moMax?Math.round(moCount[i]/moMax*100):0}%"></div></div>
+    <span class="bar-val">${moCount[i]} T.</span>
+  </div>`).join('');
 </script>
 </body>
 </html>
