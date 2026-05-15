@@ -19,6 +19,9 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -26,6 +29,9 @@ jobs:
     steps:
       - name: Repository laden
         uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Python einrichten
         uses: actions/setup-python@v6
@@ -45,6 +51,15 @@ jobs:
           AIRBNB_CHECKIN:  ${{ github.event.inputs.checkin }}
           AIRBNB_CHECKOUT: ${{ github.event.inputs.checkout }}
 
+      - name: CSV-Status prüfen
+        run: |
+          echo "--- CSV-Datei ---"
+          ls -la airbnb_ergebnisse.csv || echo "Datei existiert nicht!"
+          echo "--- Inhalt (erste 5 Zeilen) ---"
+          head -n 5 airbnb_ergebnisse.csv || true
+          echo "--- Zeilenanzahl ---"
+          wc -l airbnb_ergebnisse.csv || true
+
       - name: CSV als Artefakt hochladen
         uses: actions/upload-artifact@v5
         with:
@@ -57,6 +72,10 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add airbnb_ergebnisse.csv
-          git diff --cached --quiet && echo "Keine Änderungen." || \
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen — Datei unverändert."
+          else
             git commit -m "chore: Airbnb-Ergebnisse aktualisieren (${{ github.event.inputs.location }}, ${{ github.event.inputs.checkin }}–${{ github.event.inputs.checkout }})"
-          git push
+            git push origin HEAD:${{ github.ref_name }}
+            echo "CSV committed und gepusht."
+          fi

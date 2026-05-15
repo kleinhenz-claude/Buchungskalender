@@ -228,6 +228,8 @@ def main():
     if not all_listings:
         print("\nKeine Inserate gefunden.")
         print("Tipp: Prüfe ob Airbnb für diesen Ort Ergebnisse liefert.")
+        save_csv([])
+        print(f"Leere CSV mit Spaltenköpfen geschrieben → {OUTFILE}")
         return
 
     save_csv(all_listings)
