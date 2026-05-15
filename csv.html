@@ -6,6 +6,8 @@
 <title>Airbnb Ergebnisse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -210,6 +212,18 @@ tbody tr:hover td { background: rgba(196,149,106,0.05); }
 .upload-bar input[type=file] { display: none; }
 .upload-hint { font-size: 12px; color: var(--text-muted); }
 
+.map-section { margin-bottom: 3rem; }
+#map {
+  height: 420px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  z-index: 0;
+}
+.leaflet-popup-content { font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.5; }
+.leaflet-popup-content strong { font-weight: 500; }
+.leaflet-popup-content a { color: #8B5E3C; }
+.map-hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
 footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center; font-size: 12px; padding: 1.5rem; letter-spacing: 0.05em; }
 
 @media (max-width: 640px) {
@@ -243,6 +257,12 @@ footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center;
     </label>
     <span class="upload-hint" id="upload-hint">Eigene <code>airbnb_ergebnisse.csv</code> hochladen — oder Seite lädt sie automatisch.</span>
   </div>
+
+  <section class="map-section">
+    <h2 class="section-title">Karte</h2>
+    <div id="map"></div>
+    <p class="map-hint" id="map-hint">Karte wird geladen …</p>
+  </section>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:12px;">
     <h2 class="section-title" style="margin-bottom:0;flex:1;">Ergebnisse · Ostfildern</h2>
@@ -285,6 +305,74 @@ footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center;
 <script>
 const CSV_FILE = 'airbnb_ergebnisse.csv';
 let allRows = [], currentView = 'cards';
+
+// Karte: Ostfildern-Scharnhausen
+const OSTFILDERN = [48.7239, 9.2569];
+let map, markers = [], markerLayer;
+
+function initMap() {
+  map = L.map('map').setView(OSTFILDERN, 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    maxZoom: 19
+  }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+}
+
+function updateMap(rows) {
+  if (!map) return;
+  markerLayer.clearLayers();
+  markers = [];
+  const hint = document.getElementById('map-hint');
+  const toGeocode = rows.filter(r => r._isOstfildern);
+
+  if (!toGeocode.length) {
+    hint.textContent = 'Keine Ostfildern-Inserate zum Anzeigen.';
+    return;
+  }
+
+  hint.textContent = `Geocoding ${toGeocode.length} Inserate …`;
+  let done = 0;
+
+  // Nominatim: max 1 Anfrage/Sek (ToS)
+  toGeocode.forEach((r, i) => {
+    setTimeout(async () => {
+      try {
+        const q = encodeURIComponent(r._name + ', Ostfildern, Deutschland');
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+          { headers: { 'Accept-Language': 'de' } }
+        );
+        const data = await res.json();
+        if (data.length) {
+          const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+          const icon = L.divIcon({
+            className: '',
+            html: `<div style="background:${r._superhost ? '#7A9ADE' : '#C4956A'};
+              width:12px;height:12px;border-radius:50%;border:2px solid #fff;
+              box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
+            iconSize: [12, 12], iconAnchor: [6, 6]
+          });
+          const marker = L.marker([lat, lng], { icon })
+            .bindPopup(`<strong>${r._name}</strong><br>${r._location}<br>
+              ${r._preis ? '<b>' + r._preis + '</b><br>' : ''}
+              ${r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : ''}
+              ${r.URL ? '<a href="' + r.URL + '" target="_blank">Auf Airbnb ansehen →</a>' : ''}`)
+            .addTo(markerLayer);
+          markers.push({ marker, row: r });
+        }
+      } catch (_) {}
+      done++;
+      if (done === toGeocode.length) {
+        hint.textContent = `${markers.length} von ${toGeocode.length} Inseraten auf der Karte · Blau = Superhost`;
+        if (markers.length) {
+          const group = L.featureGroup(markers.map(m => m.marker));
+          map.fitBounds(group.getBounds().pad(0.15));
+        }
+      }
+    }, i * 1100); // 1.1s Abstand (Nominatim-ToS: 1 req/s)
+  });
+}
 
 async function loadCSV() {
   const res = await fetch(CSV_FILE);
@@ -473,6 +561,8 @@ function loadRows(raw) {
   allRows = raw.map(normalizeRow);
 }
 
+initMap();
+
 ['search','sort-select','superhost-filter'].forEach(id =>
   document.getElementById(id).addEventListener('input', render));
 
@@ -488,6 +578,7 @@ document.getElementById('file-input').addEventListener('change', e => {
     document.getElementById('hero-sub').textContent = file.name;
     updateStats(allRows);
     render();
+    updateMap(allRows);
   };
   reader.readAsText(file, 'utf-8');
 });
@@ -507,6 +598,7 @@ document.getElementById('file-input').addEventListener('change', e => {
     document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
     updateStats(allRows);
     render();
+    updateMap(allRows);
   } catch (e) {
     document.getElementById('hero-sub').textContent = 'Fehler beim Laden.';
     showState(`Fehler: ${e.message}`);
