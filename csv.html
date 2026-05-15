@@ -364,8 +364,7 @@ footer {
       <option value="">Sortieren …</option>
       <option value="preis-asc">Preis ↑</option>
       <option value="preis-desc">Preis ↓</option>
-      <option value="rating-desc">Bewertung ↓</option>
-      <option value="reviews-desc">Rezensionen ↓</option>
+      <option value="superhost">Superhost zuerst</option>
     </select>
     <select id="superhost-filter">
       <option value="">Alle</option>
@@ -395,7 +394,234 @@ footer {
 const CSV_FILE = 'airbnb_ergebnisse.csv';
 let allRows = [];
 let currentView = 'cards';
-let sortCol = null, sortDir = 1;
+
+async function loadCSV() {
+  const res = await fetch(CSV_FILE);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return parseCSV(await res.text());
+}
+
+function parseCSV(raw) {
+  const text = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
+  const records = [];
+  let i = 0, n = text.length;
+  while (i < n) {
+    const fields = [];
+    while (true) {
+      let field = '';
+      if (text[i] === '"') {
+        i++;
+        while (i < n) {
+          if (text[i] === '"') {
+            if (text[i+1] === '"') { field += '"'; i += 2; }
+            else { i++; break; }
+          } else { field += text[i++]; }
+        }
+      } else {
+        while (i < n && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r')
+          field += text[i++];
+      }
+      fields.push(field);
+      if (i >= n || text[i] === '\n' || text[i] === '\r') break;
+      i++;
+    }
+    if (text[i] === '\r') i++;
+    if (text[i] === '\n') i++;
+    if (fields.length > 1 || fields[0] !== '') records.push(fields);
+  }
+  if (records.length < 2) return [];
+  const headers = records[0];
+  return records.slice(1).map(vals => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] ?? '').trim());
+    return obj;
+  });
+}
+
+// Extrahiert strukturierte Felder aus dem Roh-Scraper-Format
+function normalizeRow(r) {
+  const lines = r.Preis_pro_Nacht.split('\n').map(l => l.trim()).filter(l => l);
+  const badge = lines[0] || '';
+  const superhost = badge === 'Superhost';
+  const locLine = lines.find(l =>
+    /^(Wohnung|Zimmer|Unterkunft|Eigentumswohnung|Haus|Bungalow|Ferienwohnung|Suite|Studio) in /i.test(l)
+  ) || r.Titel || '';
+  const locIdx = lines.indexOf(locLine);
+  const name = (locIdx >= 0 && lines[locIdx + 1]) ? lines[locIdx + 1] : r.Titel;
+  const cityM = locLine.match(/ in (.+)$/i);
+  const city = cityM ? cityM[1].trim() : '';
+  const preis = r.Gesamtpreis.replace(/Gesamtpreis/g, '').replace(/ /g, ' ').trim();
+  return {
+    ...r,
+    _name: name,
+    _location: locLine,
+    _city: city,
+    _superhost: superhost,
+    _badge: badge,
+    _preis: preis,
+    _isOstfildern: city.toLowerCase().includes('ostfildern'),
+  };
+}
+
+function parsePrice(str) {
+  if (!str) return null;
+  const m = str.replace(/\./g, '').replace(',', '.').match(/[\d]+/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+function filtered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const sh = document.getElementById('superhost-filter').value;
+  return allRows.filter(r => {
+    if (!r._isOstfildern) return false;
+    if (sh === 'ja' && !r._superhost) return false;
+    if (q) {
+      const hay = [r._name, r._location, r._badge, r._preis, r.URL].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function sorted(rows) {
+  const sel = document.getElementById('sort-select').value;
+  if (!sel) return rows;
+  return [...rows].sort((a, b) => {
+    if (sel === 'preis-asc' || sel === 'preis-desc') {
+      const pa = parsePrice(a._preis) ?? Infinity;
+      const pb = parsePrice(b._preis) ?? Infinity;
+      return sel === 'preis-asc' ? pa - pb : pb - pa;
+    }
+    if (sel === 'superhost') return (b._superhost ? 1 : 0) - (a._superhost ? 1 : 0);
+    return 0;
+  });
+}
+
+function render() {
+  const rows = sorted(filtered());
+  document.getElementById('result-count').textContent =
+    rows.length + ' Inserat' + (rows.length !== 1 ? 'e' : '');
+  if (!rows.length) {
+    document.getElementById('cards-view').innerHTML = '';
+    document.getElementById('table-body').innerHTML = '';
+    showState('Keine Ergebnisse gefunden.');
+    return;
+  }
+  hideState();
+  if (currentView === 'cards') renderCards(rows);
+  else renderTable(rows);
+}
+
+function renderCards(rows) {
+  document.getElementById('cards-view').innerHTML = rows.map(r => {
+    const badgeCls = r._superhost ? 'pill-super' :
+      r._badge.includes('Favorit') ? 'pill-rating' : 'pill-total';
+    const badge = r._badge ? `<span class="pill ${badgeCls}">${esc(r._badge)}</span>` : '';
+    const preis = r._preis ? `<span class="pill pill-price">${esc(r._preis)}</span>` : '';
+    const link = r.URL ? `<a class="card-link" href="${esc(r.URL)}" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>` : '';
+    return `<div class="card">
+      <div class="card-title">${esc(r._name || '–')}</div>
+      <div class="card-sub">${esc(r._location)}</div>
+      <div class="card-meta">${preis}${badge}</div>
+      ${link}
+    </div>`;
+  }).join('');
+}
+
+function renderTable(rows) {
+  document.getElementById('table-head').innerHTML =
+    ['Objekt','Standort','Preis','Superhost','Link'].map(l => `<th>${l}</th>`).join('');
+  document.getElementById('table-body').innerHTML = rows.map(r => `<tr>
+    <td>${esc(r._name || '–')}</td>
+    <td>${esc(r._location)}</td>
+    <td>${esc(r._preis || '–')}</td>
+    <td>${r._superhost ? '✓ Superhost' : '–'}</td>
+    <td>${r.URL ? `<a href="${esc(r.URL)}" target="_blank" rel="noopener">Link</a>` : '–'}</td>
+  </tr>`).join('');
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('cards-view').style.display = v === 'cards' ? 'grid' : 'none';
+  document.getElementById('table-view').style.display = v === 'table' ? 'block' : 'none';
+  document.getElementById('btn-cards').classList.toggle('active', v === 'cards');
+  document.getElementById('btn-table').classList.toggle('active', v === 'table');
+  render();
+}
+
+function showState(msg) {
+  document.getElementById('state-box').style.display = 'block';
+  document.getElementById('state-box').innerHTML = `<div class="icon">📂</div>${msg}`;
+  document.getElementById('cards-view').style.display = 'none';
+  document.getElementById('table-view').style.display = 'none';
+}
+function hideState() {
+  document.getElementById('state-box').style.display = 'none';
+  document.getElementById('cards-view').style.display = currentView === 'cards' ? 'grid' : 'none';
+  document.getElementById('table-view').style.display = currentView === 'table' ? 'block' : 'none';
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateStats(rows) {
+  const ost = rows.filter(r => r._isOstfildern);
+  const prices = ost.map(r => parsePrice(r._preis)).filter(p => p !== null);
+  const avgPrice = prices.length ? Math.round(prices.reduce((a,b)=>a+b,0)/prices.length) : null;
+  const superhosts = ost.filter(r => r._superhost).length;
+  document.getElementById('hero-stats').innerHTML = [
+    [ost.length, 'Inserate Ostfildern'],
+    [rows.length, 'Gesamt geladen'],
+    [avgPrice !== null ? avgPrice + ' €' : '–', 'Ø Gesamtpreis'],
+    [superhosts, 'Superhosts'],
+  ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
+}
+
+function processRows(raw) {
+  return raw.map(normalizeRow);
+}
+
+['search','sort-select','superhost-filter'].forEach(id =>
+  document.getElementById(id).addEventListener('input', render));
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    allRows = processRows(parseCSV(ev.target.result));
+    const ost = allRows.filter(r => r._isOstfildern).length;
+    document.getElementById('upload-hint').textContent =
+      `Geladen: ${file.name} · ${allRows.length} gesamt · ${ost} in Ostfildern`;
+    document.getElementById('hero-sub').textContent = `${file.name}`;
+    updateStats(allRows);
+    render();
+  };
+  reader.readAsText(file, 'utf-8');
+});
+
+(async () => {
+  try {
+    const raw = await loadCSV();
+    if (!raw.length) {
+      document.getElementById('hero-sub').textContent = 'CSV leer — Workflow ausführen oder Datei hochladen.';
+      document.getElementById('hero-stats').innerHTML = '';
+      showState(`<div class="icon">📭</div><strong>CSV ist leer.</strong><br><br>Airbnb-Scraper-Workflow starten oder lokale CSV hochladen.`);
+      return;
+    }
+    allRows = processRows(raw);
+    const ost = allRows.filter(r => r._isOstfildern).length;
+    document.getElementById('hero-sub').textContent = `${ost} Inserate in Ostfildern · ${allRows.length} gesamt`;
+    document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
+    updateStats(allRows);
+    render();
+  } catch (e) {
+    document.getElementById('hero-sub').textContent = 'Fehler beim Laden.';
+    showState(`<div class="icon">⚠️</div>Fehler: ${e.message}`);
+  }
+})();
+</script>
 
 async function loadCSV() {
   const res = await fetch(CSV_FILE);
