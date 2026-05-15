@@ -280,6 +280,35 @@ tbody tr:hover td { background: rgba(196,149,106,0.05); }
   border-color: var(--accent-light);
 }
 
+/* UPLOAD */
+.upload-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px dashed var(--accent-light);
+  border-radius: var(--radius);
+  padding: 1rem 1.3rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.upload-bar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: var(--accent-light);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 7px 16px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.15s;
+}
+.upload-bar label:hover { opacity: 0.85; }
+.upload-bar input[type=file] { display: none; }
+.upload-hint { font-size: 12px; color: var(--text-muted); }
+
 footer {
   background: #1C1A16;
   color: rgba(245,242,236,0.32);
@@ -312,6 +341,14 @@ footer {
 </header>
 
 <main class="main">
+
+  <div class="upload-bar">
+    <label>
+      &#8593; CSV laden
+      <input type="file" id="file-input" accept=".csv">
+    </label>
+    <span class="upload-hint" id="upload-hint">Eigene <code>airbnb_ergebnisse.csv</code> hochladen — oder Seite lädt die Datei aus dem Repository automatisch.</span>
+  </div>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:12px;">
     <h2 class="section-title" style="margin-bottom:0;flex:1;">Ergebnisse</h2>
@@ -518,6 +555,20 @@ function updateStats(rows) {
     [superhosts, 'Superhosts'],
   ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
 }
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    allRows = parseCSV(ev.target.result);
+    document.getElementById('upload-hint').textContent = `Geladen: ${file.name} · ${allRows.length} Zeile${allRows.length !== 1 ? 'n' : ''}`;
+    document.getElementById('hero-sub').textContent = `${allRows.length} Inserate · ${file.name}`;
+    updateStats(allRows);
+    render();
+  };
+  reader.readAsText(file, 'utf-8');
+});
 
 (async () => {
   try {
