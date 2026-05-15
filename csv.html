@@ -235,9 +235,34 @@ footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center;
   .filter-bar input { min-width: unset; width: 100%; }
   .result-count { margin-left: 0; }
 }
+.nav-bar {
+  background: #1C1A16;
+  padding: 0 2.5rem;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-link {
+  color: rgba(245,242,236,0.45);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.75rem 1rem;
+  transition: color 0.15s;
+  font-weight: 400;
+}
+.nav-link:hover { color: var(--accent-light); }
+.nav-link.active { color: var(--accent-light); }
 </style>
 </head>
 <body>
+
+<nav class="nav-bar">
+  <a class="nav-link" href="index.html">Kalender</a>
+  <a class="nav-link active" href="csv.html">Inserate</a>
+  <a class="nav-link" href="termine.html">Termine</a>
+</nav>
 
 <header class="hero">
   <div class="hero-orb1"></div>
