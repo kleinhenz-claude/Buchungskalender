@@ -17,9 +17,9 @@ import os
 import re
 from playwright.sync_api import sync_playwright
 
-LOCATION  = "Ostfildern-Scharnhausen"
-CHECKIN   = "2026-05-22"
-CHECKOUT  = "2026-05-24"
+LOCATION  = os.getenv("AIRBNB_LOCATION", "Ostfildern-Scharnhausen")
+CHECKIN   = os.getenv("AIRBNB_CHECKIN",  "2026-05-22")
+CHECKOUT  = os.getenv("AIRBNB_CHECKOUT", "2026-05-24")
 MAX_PAGES = 10
 OUTFILE   = os.path.join(os.path.dirname(__file__), "airbnb_ergebnisse.csv")
 

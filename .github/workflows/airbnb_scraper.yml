@@ -1,0 +1,50 @@
+name: Airbnb Scraper
+
+on:
+  workflow_dispatch:
+    inputs:
+      location:
+        description: "Ort (z.B. Ostfildern-Scharnhausen)"
+        default: "Ostfildern-Scharnhausen"
+        required: true
+      checkin:
+        description: "Check-in (YYYY-MM-DD)"
+        default: "2026-05-22"
+        required: true
+      checkout:
+        description: "Check-out (YYYY-MM-DD)"
+        default: "2026-05-24"
+        required: true
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Playwright installieren
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Scraper ausführen
+        run: |
+          python airbnb_scraper.py
+        env:
+          AIRBNB_LOCATION: ${{ github.event.inputs.location }}
+          AIRBNB_CHECKIN:  ${{ github.event.inputs.checkin }}
+          AIRBNB_CHECKOUT: ${{ github.event.inputs.checkout }}
+
+      - name: CSV als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: airbnb-ergebnisse
+          path: airbnb_ergebnisse.csv
+          retention-days: 30
