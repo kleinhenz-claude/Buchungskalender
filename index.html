@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scharnhäusle 10 — Belegungskalender 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F2EC;
+  --surface: #FDFCFA;
+  --surface2: #EDEBE4;
+  --accent: #8B5E3C;
+  --accent-light: #C4956A;
+  --booked-bg: #F5E6D8;
+  --booked-color: #7A3E1A;
+  --booked-border: #D4956A;
+  --free-bg: #E8EDE5;
+  --free-color: #3B6134;
+  --free-border: #7AAE74;
+  --text: #1C1A16;
+  --text-muted: #7A7469;
+  --text-faint: #B0A99F;
+  --border: rgba(28,26,22,0.1);
+  --radius: 14px;
+  --radius-sm: 7px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* HERO */
+.hero {
+  background: #1C1A16;
+  color: var(--bg);
+  padding: 3rem 2.5rem 2.75rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-orb1 {
+  position: absolute; top: -80px; right: -80px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,149,106,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-orb2 {
+  position: absolute; bottom: -50px; left: 60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(196,149,106,0.09) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  margin-bottom: 0.6rem;
+  font-weight: 400;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.08;
+  color: var(--bg);
+  margin-bottom: 0.4rem;
+}
+.hero-sub {
+  font-size: 13px;
+  color: rgba(245,242,236,0.45);
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 2.25rem;
+}
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 700px;
+}
+.hero-stat {
+  background: rgba(255,255,255,0.03);
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+.hero-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  line-height: 1;
+  margin-bottom: 5px;
+}
+.hero-stat-label {
+  font-size: 11px;
+  color: rgba(245,242,236,0.42);
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+/* MAIN */
+.main {
+  padding: 2.5rem 2.5rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* LEGEND */
+.legend {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 1.5rem;
+  font-size: 12px;
+  color: var(--text-muted);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.leg-item { display: flex; align-items: center; gap: 7px; }
+.leg-dot { width: 13px; height: 13px; border-radius: 3px; }
+.leg-booked { background: var(--booked-bg); outline: 1px solid var(--booked-border); }
+.leg-free   { background: var(--free-bg);   outline: 1px solid var(--free-border); }
+
+/* MONTHS */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+  margin-bottom: 3rem;
+}
+.month-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem 1.3rem;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.month-card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.month-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+.month-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 400;
+  border: 1px solid;
+}
+.badge-high { background:#FEF0E7; color:#7A3E1A; border-color:#D4956A; }
+.badge-mid  { background:#FFFBE8; color:#6B5000; border-color:#D4C06A; }
+.badge-low  { background:#EEF7EC; color:#2D5A27; border-color:#7AAE74; }
+
+.cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.day-name {
+  font-size: 10px;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 2px 0 5px;
+  font-weight: 400;
+}
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  border-radius: 3px;
+  font-weight: 300;
+}
+.day-empty  { background: transparent; }
+.day-free   { background: var(--free-bg);   color: var(--free-color); }
+.day-booked { background: var(--booked-bg); color: var(--booked-color); font-weight: 500; }
+.day-today  { outline: 2px solid var(--accent); outline-offset: -1px; font-weight: 500; }
+
+.occ-bar-wrap {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.occ-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent-light);
+}
+
+/* TABLE */
+.bookings-section { margin-bottom: 3rem; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 12px 10px 0;
+}
+td {
+  padding: 11px 12px 11px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(196,149,106,0.05); }
+
+.dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.nights-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  background: var(--surface2);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.type-tag {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-weight: 400;
+  border: 1px solid;
+}
+.type-long  { background:#EEF7EC; color:#2D5A27; border-color:#7AAE74; }
+.type-week  { background:#EEF3FE; color:#1A3A8B; border-color:#7A9ADE; }
+.type-short { background:var(--surface2); color:var(--text-muted); border-color:var(--border); }
+
+/* FREE PERIODS */
+.free-section { margin-bottom: 2rem; }
+.free-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.free-card {
+  background: var(--surface);
+  border: 1px solid var(--free-border);
+  border-left: 3px solid var(--free-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.1rem;
+}
+.free-card-dates { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.free-card-nights { font-size: 12px; color: var(--text-muted); }
+
+/* FOOTER */
+footer {
+  background: #1C1A16;
+  color: rgba(245,242,236,0.32);
+  text-align: center;
+  font-size: 12px;
+  padding: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 2rem 1.25rem 2rem; }
+  .main { padding: 1.5rem 1.25rem 3rem; }
+  .hero-stats { grid-template-columns: repeat(2,1fr); }
+  .hero-stat-val { font-size: 1.6rem; }
+  th, td { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <p class="hero-eyebrow">Smoobu · Live-Daten</p>
+  <h1>Scharnhäusle 10</h1>
+  <p class="hero-sub">Belegungskalender 2026 · automatisch aus iCal ausgewertet</p>
+  <div class="hero-stats" id="hero-stats"></div>
+</header>
+
+<main class="main">
+
+  <h2 class="section-title">Monatsübersicht</h2>
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot leg-booked"></span>Belegt</span>
+    <span class="leg-item"><span class="leg-dot leg-free"></span>Frei</span>
+  </div>
+  <div class="months-grid" id="months-grid"></div>
+
+  <section class="bookings-section">
+    <h2 class="section-title">Alle Buchungen</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Anreise</th>
+            <th>Abreise</th>
+            <th>Nächte</th>
+            <th>Typ</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="free-section">
+    <h2 class="section-title">Freie Zeiträume (ab heute)</h2>
+    <div class="free-grid" id="free-grid"></div>
+  </section>
+
+</main>
+
+<footer>
+  Quelle: login.smoobu.com &nbsp;·&nbsp; Abgerufen: 15. Mai 2026 &nbsp;·&nbsp; Scharnhäusle 10
+</footer>
+
+<script>
+const RAW = [
+  {s:'2026-01-09',e:'2026-02-07'},{s:'2026-02-07',e:'2026-02-08'},
+  {s:'2026-03-07',e:'2026-03-09'},{s:'2026-03-10',e:'2026-03-11'},
+  {s:'2026-03-14',e:'2026-03-15'},{s:'2026-03-15',e:'2026-03-17'},
+  {s:'2026-03-17',e:'2026-03-18'},{s:'2026-03-18',e:'2026-03-21'},
+  {s:'2026-03-21',e:'2026-03-22'},{s:'2026-03-22',e:'2026-03-23'},
+  {s:'2026-03-23',e:'2026-03-24'},{s:'2026-03-24',e:'2026-03-26'},
+  {s:'2026-03-26',e:'2026-03-27'},{s:'2026-03-27',e:'2026-03-28'},
+  {s:'2026-03-28',e:'2026-03-29'},{s:'2026-04-03',e:'2026-04-04'},
+  {s:'2026-04-04',e:'2026-04-05'},{s:'2026-04-05',e:'2026-04-06'},
+  {s:'2026-04-07',e:'2026-04-08'},{s:'2026-04-10',e:'2026-04-12'},
+  {s:'2026-04-13',e:'2026-04-15'},{s:'2026-04-15',e:'2026-04-17'},
+  {s:'2026-04-17',e:'2026-04-18'},{s:'2026-04-18',e:'2026-04-19'},
+  {s:'2026-04-19',e:'2026-04-20'},{s:'2026-04-22',e:'2026-04-24'},
+  {s:'2026-04-24',e:'2026-04-25'},{s:'2026-04-25',e:'2026-04-26'},
+  {s:'2026-05-01',e:'2026-05-02'},{s:'2026-05-02',e:'2026-05-03'},
+  {s:'2026-05-03',e:'2026-05-04'},{s:'2026-05-04',e:'2026-05-05'},
+  {s:'2026-05-05',e:'2026-05-07'},{s:'2026-05-09',e:'2026-05-10'},
+  {s:'2026-05-11',e:'2026-05-13'},{s:'2026-05-14',e:'2026-05-15'},
+  {s:'2026-05-15',e:'2026-05-17'},{s:'2026-05-19',e:'2026-05-20'},
+  {s:'2026-06-08',e:'2026-06-10'},{s:'2026-06-27',e:'2026-07-24'},
+  {s:'2026-08-21',e:'2026-08-23'},{s:'2026-09-16',e:'2026-09-18'},
+  {s:'2026-09-18',e:'2026-09-20'},{s:'2026-11-27',e:'2026-11-30'},
+];
+
+const MN  = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const DN  = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+const TODAY = new Date(2026,4,15);
+
+function pd(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function toKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function add(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function diff(a,b){return Math.round((b-a)/86400000);}
+function fmt(d){return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function wd(d){return d.toLocaleDateString('de-DE',{weekday:'short'});}
+
+// Merge
+const sorted=RAW.map(e=>({s:pd(e.s),e:pd(e.e)})).sort((a,b)=>a.s-b.s);
+const merged=[];
+for(const ev of sorted){
+  if(merged.length && ev.s<=merged[merged.length-1].e){
+    if(ev.e>merged[merged.length-1].e) merged[merged.length-1].e=ev.e;
+  } else { merged.push({s:new Date(ev.s),e:new Date(ev.e)}); }
+}
+
+// Booked set
+const booked=new Set();
+for(const b of merged){let c=new Date(b.s);while(c<b.e){booked.add(toKey(c));c=add(c,1);}}
+
+// Stats
+const totalDays=merged.reduce((a,b)=>a+diff(b.s,b.e),0);
+const occ=Math.round(totalDays/365*100);
+const future=merged.reduce((a,b)=>{if(b.e>TODAY){const s=b.s<TODAY?TODAY:b.s;return a+diff(s,b.e);}return a;},0);
+
+document.getElementById('hero-stats').innerHTML=[
+  [merged.length,'Buchungen'],
+  [totalDays,'Belegte Tage'],
+  [occ+'%','Auslastung'],
+  [future,'Tage ab heute'],
+].map(([v,l])=>`<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
+
+// Months
+const mg=document.getElementById('months-grid');
+for(let mo=0;mo<12;mo++){
+  const first=new Date(2026,mo,1),last=new Date(2026,mo+1,0);
+  let bc=0;
+  for(let d=1;d<=last.getDate();d++) if(booked.has(toKey(new Date(2026,mo,d)))) bc++;
+  const pct=Math.round(bc/last.getDate()*100);
+  const bc2=pct>=70?'badge-high':pct>=30?'badge-mid':'badge-low';
+  const bt=pct>=5?pct+'% belegt':'Frei';
+
+  let sd=first.getDay(); sd=sd===0?6:sd-1;
+  let cal=DN.map(n=>`<div class="day-name">${n}</div>`).join('');
+  for(let i=0;i<sd;i++) cal+=`<div class="day day-empty"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(2026,mo,d),key=toKey(dt);
+    const isT=dt.getTime()===TODAY.getTime();
+    let cls=booked.has(key)?'day-booked':'day-free';
+    if(isT) cls+=' day-today';
+    cal+=`<div class="day ${cls}">${d}</div>`;
+  }
+
+  const card=document.createElement('div');
+  card.className='month-card';
+  card.innerHTML=`
+    <div class="month-header">
+      <span class="month-name">${MN[mo]}</span>
+      <span class="month-badge ${bc2}">${bt}</span>
+    </div>
+    <div class="cal">${cal}</div>
+    <div class="occ-bar-wrap"><div class="occ-bar" style="width:${pct}%"></div></div>
+  `;
+  mg.appendChild(card);
+}
+
+// Table
+document.getElementById('bookings-tbody').innerHTML=merged.map(b=>{
+  const n=diff(b.s,b.e);
+  const tc=n>=14?'type-long':n>=7?'type-week':'type-short';
+  const tl=n>=14?'Langaufenthalt':n>=7?'Woche':'Kurztrip';
+  return `<tr>
+    <td><span class="dot"></span>${wd(b.s)}, ${fmt(b.s)}</td>
+    <td>${wd(b.e)}, ${fmt(b.e)}</td>
+    <td><span class="nights-pill">${n} Nacht${n!==1?'e':''}</span></td>
+    <td><span class="type-tag ${tc}">${tl}</span></td>
+  </tr>`;
+}).join('');
+
+// Free periods
+const fp=[];
+let prev=new Date(TODAY);
+for(const b of merged){
+  if(b.s>prev){const g=diff(prev,b.s);if(g>=1)fp.push({s:new Date(prev),e:new Date(b.s),n:g});}
+  if(b.e>prev) prev=new Date(b.e);
+}
+const ye=new Date(2026,11,31);
+if(prev<ye) fp.push({s:new Date(prev),e:ye,n:diff(prev,ye)});
+
+const fg=document.getElementById('free-grid');
+fg.innerHTML=fp.length?fp.map(p=>`
+  <div class="free-card">
+    <div class="free-card-dates">${fmt(p.s)} – ${fmt(p.e)}</div>
+    <div class="free-card-nights">${p.n} freie Nacht${p.n!==1?'e':''}</div>
+  </div>`).join(''):'<p style="color:var(--text-muted);font-size:13px;">Keine freien Zeiträume.</p>';
+</script>
+</body>
+</html>
