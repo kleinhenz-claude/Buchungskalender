@@ -324,54 +324,46 @@ function updateMap(rows) {
   markerLayer.clearLayers();
   markers = [];
   const hint = document.getElementById('map-hint');
-  const toGeocode = rows.filter(r => r._isOstfildern);
+  const toShow = rows.filter(r => r._isOstfildern);
 
-  if (!toGeocode.length) {
+  if (!toShow.length) {
     hint.textContent = 'Keine Ostfildern-Inserate zum Anzeigen.';
     return;
   }
 
-  hint.textContent = `Geocoding ${toGeocode.length} Inserate …`;
-  let done = 0;
+  // Marker um Ostfildern-Zentrum verteilen (kein Geocoding nötig)
+  const n = toShow.length;
+  toShow.forEach((r, i) => {
+    // Spiralförmige Verteilung damit alle sichtbar und anklickbar sind
+    const angle = (i / n) * 2 * Math.PI;
+    const radius = 0.003 + (Math.floor(i / 8) * 0.002);
+    const lat = OSTFILDERN[0] + Math.sin(angle) * radius;
+    const lng = OSTFILDERN[1] + Math.cos(angle) * radius * 1.4;
 
-  // Nominatim: max 1 Anfrage/Sek (ToS)
-  toGeocode.forEach((r, i) => {
-    setTimeout(async () => {
-      try {
-        const q = encodeURIComponent(r._name + ', Ostfildern, Deutschland');
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
-          { headers: { 'Accept-Language': 'de' } }
-        );
-        const data = await res.json();
-        if (data.length) {
-          const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-          const icon = L.divIcon({
-            className: '',
-            html: `<div style="background:${r._superhost ? '#7A9ADE' : '#C4956A'};
-              width:12px;height:12px;border-radius:50%;border:2px solid #fff;
-              box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
-            iconSize: [12, 12], iconAnchor: [6, 6]
-          });
-          const marker = L.marker([lat, lng], { icon })
-            .bindPopup(`<strong>${r._name}</strong><br>${r._location}<br>
-              ${r._preis ? '<b>' + r._preis + '</b><br>' : ''}
-              ${r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : ''}
-              ${r.URL ? '<a href="' + r.URL + '" target="_blank">Auf Airbnb ansehen →</a>' : ''}`)
-            .addTo(markerLayer);
-          markers.push({ marker, row: r });
-        }
-      } catch (_) {}
-      done++;
-      if (done === toGeocode.length) {
-        hint.textContent = `${markers.length} von ${toGeocode.length} Inseraten auf der Karte · Blau = Superhost`;
-        if (markers.length) {
-          const group = L.featureGroup(markers.map(m => m.marker));
-          map.fitBounds(group.getBounds().pad(0.15));
-        }
-      }
-    }, i * 1100); // 1.1s Abstand (Nominatim-ToS: 1 req/s)
+    const color = r._superhost ? '#7A9ADE' : '#C4956A';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;
+        border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);cursor:pointer"></div>`,
+      iconSize: [12, 12], iconAnchor: [6, 6]
+    });
+
+    const popup = `
+      <strong>${r._name}</strong><br>
+      ${r._location}<br>
+      ${r._preis ? '<b>' + r._preis + '</b><br>' : ''}
+      ${r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : ''}
+      ${r.URL ? '<a href="' + r.URL + '" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>' : ''}
+    `;
+
+    const marker = L.marker([lat, lng], { icon })
+      .bindPopup(popup)
+      .addTo(markerLayer);
+    markers.push({ marker, row: r });
   });
+
+  map.setView(OSTFILDERN, 14);
+  hint.textContent = `${n} Inserate · Blau = Superhost · Klicken für Details`;
 }
 
 async function loadCSV() {
