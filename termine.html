@@ -6,6 +6,8 @@
 <title>Termine · Ostfildern &amp; Umgebung</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLEg=" crossorigin=""></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -305,6 +307,97 @@ footer a:hover { color: var(--accent-light); }
 .nav-link:hover { color: var(--accent-light); }
 .nav-link.active { color: var(--accent-light); }
 
+/* MAP */
+.map-section {
+  margin-bottom: 2.5rem;
+}
+.map-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+  cursor: default;
+}
+.map-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.map-toggle-btn:hover { border-color: var(--accent-light); color: var(--accent); }
+.map-toggle-btn.active { border-color: var(--accent-light); color: var(--accent); background: #FFF8F1; }
+.map-toggle-btn svg { flex-shrink: 0; }
+.map-wrap {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+#event-map {
+  height: 420px;
+  width: 100%;
+}
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(0,0,0,0.15);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.14) !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+.map-popup-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1C1A16;
+  margin-bottom: 4px;
+}
+.map-popup-dates {
+  font-size: 11px;
+  color: #8B5E3C;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.map-popup-ort {
+  font-size: 11px;
+  color: #7A7469;
+  margin-bottom: 6px;
+}
+.map-popup-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
 @media (max-width: 700px) {
   .hero { padding: 2rem 1.25rem 2rem; }
   .main { padding: 1.5rem 1.25rem 3rem; }
@@ -313,6 +406,7 @@ footer a:hover { color: var(--accent-light); }
   .filter-bar { flex-direction: column; align-items: stretch; }
   .filter-bar input { min-width: unset; }
   .result-count { margin-left: 0; }
+  #event-map { height: 300px; }
 }
 </style>
 </head>
@@ -355,6 +449,24 @@ footer a:hover { color: var(--accent-light); }
     <span class="result-count" id="result-count"></span>
   </div>
 
+  <div class="map-section" id="map-section">
+    <div class="section-title">
+      Kartenübersicht
+      <button class="map-toggle-btn active" id="map-toggle-btn" onclick="toggleMap()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M1 3l5 2 4-2 5 2v10l-5-2-4 2-5-2V3z"/>
+        </svg>
+        Karte ausblenden
+      </button>
+    </div>
+    <div id="map-collapsible">
+      <div class="map-wrap">
+        <div id="event-map"></div>
+        <div class="map-legend" id="map-legend"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="cards-grid" class="cards-grid"></div>
   <div id="state-box" class="state-box" style="display:none;"></div>
 
@@ -374,7 +486,7 @@ const EVENTS = [
     name: 'Stuttgarter Frühlingsfest',
     start: '2026-04-17', end: '2026-05-10',
     ort: 'Stuttgart-Bad Cannstatt · Cannstatter Wasen',
-    dist: 9,
+    dist: 9, lat: 48.7980, lng: 9.2311,
     cat: 'volksfest',
     desc: 'Zweitgrößtes Volksfest der Welt nach dem Oktoberfest: Fahrgeschäfte, Bierzelte und das traditionelle Frühlingsfest-Feuerwerk.',
     url: 'https://www.stuttgarter-fruehlingsfest.de'
@@ -383,7 +495,7 @@ const EVENTS = [
     name: 'Stuttgart-Marathon',
     start: '2026-04-26', end: '2026-04-26',
     ort: 'Stuttgart-Mitte',
-    dist: 9,
+    dist: 9, lat: 48.7758, lng: 9.1829,
     cat: 'sport',
     desc: 'Einer der schönsten Stadtmarathons Deutschlands – mit Halbmarathon, 10-km-Lauf und Bambini-Lauf durch die Stuttgarter Innenstadt.',
     url: 'https://www.stuttgart-marathon.de'
@@ -392,7 +504,7 @@ const EVENTS = [
     name: 'Denkendorfer Klosterfest',
     start: '2026-06-06', end: '2026-06-07',
     ort: 'Denkendorf · Kloster Denkendorf',
-    dist: 5,
+    dist: 5, lat: 48.6950, lng: 9.2742,
     cat: 'kultur',
     desc: 'Mittelalterliches Fest rund um das romanische Kloster Denkendorf mit Musik, Handwerk, Schauvorführungen und Gastronomie.',
     url: ''
@@ -401,7 +513,7 @@ const EVENTS = [
     name: 'Stadtfest Leinfelden-Echterdingen',
     start: '2026-06-19', end: '2026-06-21',
     ort: 'Leinfelden-Echterdingen · Stadtmitte',
-    dist: 4,
+    dist: 4, lat: 48.6929, lng: 9.1461,
     cat: 'stadtfest',
     desc: 'Dreitägiges Stadtfest mit Live-Musik auf mehreren Bühnen, Händlern, Gastronomie und einem bunten Rahmenprogramm für alle Altersgruppen.',
     url: ''
@@ -410,7 +522,7 @@ const EVENTS = [
     name: 'Esslinger Stadtfest',
     start: '2026-06-26', end: '2026-06-28',
     ort: 'Esslingen am Neckar · Altstadt',
-    dist: 5,
+    dist: 5, lat: 48.7388, lng: 9.3139,
     cat: 'stadtfest',
     desc: 'Das größte Fest in Esslingen: Die gesamte Altstadt verwandelt sich in eine Festmeile mit Live-Konzerten, Kulinarik und Straßenkunst.',
     url: 'https://www.stadtfest-esslingen.de'
@@ -419,7 +531,7 @@ const EVENTS = [
     name: 'Stadtfest Ostfildern',
     start: '2026-07-04', end: '2026-07-05',
     ort: 'Ostfildern · Scharnhausen',
-    dist: 0,
+    dist: 0, lat: 48.7226, lng: 9.2528,
     cat: 'stadtfest',
     desc: 'Das jährliche Stadtfest von Ostfildern mit Musik, lokalen Vereinen, Essens- und Getränkeständen sowie einem Programm für Kinder und Familien.',
     url: ''
@@ -428,7 +540,7 @@ const EVENTS = [
     name: 'Filderstädter Stadtfest',
     start: '2026-07-10', end: '2026-07-12',
     ort: 'Filderstadt-Bernhausen',
-    dist: 6,
+    dist: 6, lat: 48.6706, lng: 9.2218,
     cat: 'stadtfest',
     desc: 'Traditionelles Stadtfest in Filderstadt mit regionalen Spezialitäten, Musikbühnen und einem Festzelt im Herzen von Bernhausen.',
     url: ''
@@ -437,7 +549,7 @@ const EVENTS = [
     name: 'Stuttgarter Sommerfest',
     start: '2026-08-07', end: '2026-08-16',
     ort: 'Stuttgart · Schlossgarten',
-    dist: 9,
+    dist: 9, lat: 48.7790, lng: 9.1760,
     cat: 'stadtfest',
     desc: 'Zehn Tage Sommerfest im Stuttgarter Schlossgarten mit internationaler Gastronomie, Konzerten und einem großen Feuerwerk zum Abschluss.',
     url: 'https://www.stuttgarter-sommerfest.de'
@@ -446,7 +558,7 @@ const EVENTS = [
     name: 'Stuttgarter Weindorf',
     start: '2026-08-26', end: '2026-09-06',
     ort: 'Stuttgart · Marktplatz &amp; Schillerplatz',
-    dist: 9,
+    dist: 9, lat: 48.7737, lng: 9.1752,
     cat: 'weinfest',
     desc: 'Eines der größten Weinfeste Deutschlands: Über 120 Weingüter aus Württemberg präsentieren ihre Weine in malerischen Laubenhäuschen.',
     url: 'https://www.stuttgarter-weindorf.de'
@@ -455,7 +567,7 @@ const EVENTS = [
     name: 'Filderkrautfest',
     start: '2026-09-18', end: '2026-09-20',
     ort: 'Filderstadt-Bernhausen · Marktplatz',
-    dist: 6,
+    dist: 6, lat: 48.6710, lng: 9.2225,
     cat: 'markt',
     desc: 'Das einzigartige Fest rund um den Filderkrautkopf – eine regionale Delikatesse. Krautköpfe, Sauerkraut, Riesenkrautköpfe und schwäbische Küche.',
     url: ''
@@ -464,7 +576,7 @@ const EVENTS = [
     name: 'Cannstatter Volksfest',
     start: '2026-09-25', end: '2026-10-11',
     ort: 'Stuttgart-Bad Cannstatt · Cannstatter Wasen',
-    dist: 9,
+    dist: 9, lat: 48.7985, lng: 9.2318,
     cat: 'volksfest',
     desc: 'Das zweitgrößte Volksfest der Welt mit über 4 Millionen Besuchern, riesigen Bierzelten, einem spektakulären Feuerwerk und dem berühmten Fruchtsäulenfestzug.',
     url: 'https://www.cannstatter-volksfest.de'
@@ -473,7 +585,7 @@ const EVENTS = [
     name: 'Esslinger Zwiebelfest &amp; Neuer Wein',
     start: '2026-10-02', end: '2026-10-04',
     ort: 'Esslingen am Neckar · Marktplatz',
-    dist: 5,
+    dist: 5, lat: 48.7400, lng: 9.3132,
     cat: 'weinfest',
     desc: 'Typisch schwäbisch: Zwiebelkuchen und Federweißer (neuer Wein) in der Esslinger Altstadt – ein Herbstgenuss mit Tradition.',
     url: ''
@@ -482,7 +594,7 @@ const EVENTS = [
     name: 'Stuttgarter Weihnachtsmarkt',
     start: '2026-11-25', end: '2026-12-23',
     ort: 'Stuttgart · Marktplatz &amp; Schlossplatz',
-    dist: 9,
+    dist: 9, lat: 48.7767, lng: 9.1788,
     cat: 'weihnacht',
     desc: 'Einer der ältesten und schönsten Weihnachtsmärkte Europas mit über 280 Ständen rund um den historischen Schlossplatz und den Marktplatz.',
     url: 'https://www.stuttgarter-weihnachtsmarkt.de'
@@ -491,7 +603,7 @@ const EVENTS = [
     name: 'Esslinger Mittelaltermarkt &amp; Weihnachtsmarkt',
     start: '2026-11-25', end: '2026-12-23',
     ort: 'Esslingen am Neckar · Altstadt',
-    dist: 5,
+    dist: 5, lat: 48.7393, lng: 9.3145,
     cat: 'weihnacht',
     desc: 'Europas größter mittelalterlicher Weihnachtsmarkt: Händler in historischen Kostümen, Gaukler, Feuerschlucker und ein einzigartiges Ambiente in der Esslinger Altstadt.',
     url: 'https://www.esslinger-weihnachtsmarkt.de'
@@ -619,6 +731,170 @@ function render() {
     <div class="hero-stat"><div class="hero-stat-val">${cats}</div><div class="hero-stat-label">Kategorien</div></div>
     <div class="hero-stat"><div class="hero-stat-val">${maxDist} km</div><div class="hero-stat-label">Max. Entfernung</div></div>
   `;
+}
+
+// MAP
+const CAT_COLOR = {
+  volksfest: '#92400E',
+  stadtfest: '#1A3A8B',
+  weihnacht: '#991B1B',
+  weinfest:  '#6B21A8',
+  markt:     '#065F46',
+  sport:     '#0C4A6E',
+  kultur:    '#7C2D12'
+};
+const CAT_BG = {
+  volksfest: '#FEF3E2',
+  stadtfest: '#EEF3FE',
+  weihnacht: '#FEE2E2',
+  weinfest:  '#F3E8FF',
+  markt:     '#ECFDF5',
+  sport:     '#F0F9FF',
+  kultur:    '#FFF7ED'
+};
+
+const eventMap = L.map('event-map', { zoomControl: true }).setView([48.7340, 9.2350], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 18
+}).addTo(eventMap);
+
+L.circleMarker([48.7226, 9.2528], {
+  radius: 7, color: '#8B5E3C', fillColor: '#C4956A',
+  fillOpacity: 1, weight: 2
+}).addTo(eventMap).bindTooltip('Ostfildern-Scharnhausen', { permanent: false, direction: 'top' });
+
+let eventMarkers = [];
+
+function makeMarkerIcon(cat, past) {
+  const color = past ? '#B0A99F' : CAT_COLOR[cat];
+  const bg    = past ? '#EDEBE4' : CAT_BG[cat];
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:16px;height:16px;border-radius:50%;background:${bg};border:2.5px solid ${color};box-shadow:0 1px 5px rgba(0,0,0,0.25);"></div>`,
+    iconSize: [16, 16], iconAnchor: [8, 8], popupAnchor: [0, -10]
+  });
+}
+
+function updateMap(rows) {
+  eventMarkers.forEach(m => eventMap.removeLayer(m));
+  eventMarkers = [];
+
+  rows.forEach(ev => {
+    if (!ev.lat || !ev.lng) return;
+    const past = isPast(ev), active = isActive(ev);
+    const statusHtml = active
+      ? `<span style="font-size:10px;color:#065F46;font-weight:500;">Läuft jetzt</span>`
+      : past ? `<span style="font-size:10px;color:#B0A99F;">Vergangen</span>` : '';
+    const popup = `<div style="min-width:180px;max-width:240px;font-family:'DM Sans',sans-serif;">
+      <div class="map-popup-name">${ev.name}</div>
+      <div class="map-popup-dates">${formatRange(ev)}</div>
+      <div class="map-popup-ort">${ev.ort}</div>
+      <span class="map-popup-badge" style="background:${CAT_BG[ev.cat]};color:${CAT_COLOR[ev.cat]};border:1px solid ${CAT_COLOR[ev.cat]}55;">${CAT_LABEL[ev.cat]}</span>
+      ${statusHtml ? `&nbsp;${statusHtml}` : ''}
+      ${ev.url ? `<div style="margin-top:8px;"><a href="${ev.url}" target="_blank" rel="noopener" style="font-size:11px;color:#C4956A;">→ Mehr erfahren</a></div>` : ''}
+    </div>`;
+    const marker = L.marker([ev.lat, ev.lng], { icon: makeMarkerIcon(ev.cat, past) })
+      .addTo(eventMap).bindPopup(popup);
+    eventMarkers.push(marker);
+  });
+
+  const cats = [...new Set(rows.map(e => e.cat))];
+  document.getElementById('map-legend').innerHTML = cats.map(c =>
+    `<span class="legend-item"><span class="legend-dot" style="background:${CAT_BG[c]};border-color:${CAT_COLOR[c]};"></span>${CAT_LABEL[c]}</span>`
+  ).join('');
+}
+
+let mapVisible = true;
+function toggleMap() {
+  mapVisible = !mapVisible;
+  const col = document.getElementById('map-collapsible');
+  const btn = document.getElementById('map-toggle-btn');
+  col.style.display = mapVisible ? '' : 'none';
+  btn.classList.toggle('active', mapVisible);
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 3l5 2 4-2 5 2v10l-5-2-4 2-5-2V3z"/></svg> ${mapVisible ? 'Karte ausblenden' : 'Karte anzeigen'}`;
+  if (mapVisible) eventMap.invalidateSize();
+}
+
+function render() {
+  const q    = document.getElementById('search').value.toLowerCase();
+  const cat  = document.getElementById('cat-filter').value;
+  const time = document.getElementById('time-filter').value;
+
+  let rows = EVENTS.filter(ev => {
+    if (cat && ev.cat !== cat) return false;
+    if (time === 'upcoming' && isPast(ev)) return false;
+    if (time === 'past' && !isPast(ev)) return false;
+    if (q) {
+      const hay = (ev.name + ev.ort + ev.desc + CAT_LABEL[ev.cat]).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    const aA = isActive(a), bA = isActive(b);
+    if (aA && !bA) return -1;
+    if (!aA && bA) return 1;
+    const aP = isPast(a), bP = isPast(b);
+    if (!aP && !bP) return parseDate(a.start) - parseDate(b.start);
+    if (aP && bP) return parseDate(b.start) - parseDate(a.start);
+    if (!aP && bP) return -1;
+    return 1;
+  });
+
+  document.getElementById('result-count').textContent =
+    `${rows.length} Termin${rows.length !== 1 ? 'e' : ''}`;
+
+  const grid  = document.getElementById('cards-grid');
+  const state = document.getElementById('state-box');
+
+  if (!rows.length) {
+    grid.innerHTML = '';
+    state.style.display = '';
+    state.textContent = 'Keine Ereignisse gefunden.';
+    updateMap([]);
+    return;
+  }
+  state.style.display = 'none';
+
+  grid.innerHTML = rows.map(ev => {
+    const past = isPast(ev), active = isActive(ev);
+    const statusBadge = active
+      ? `<span class="badge badge-upcoming">Läuft jetzt</span>`
+      : past ? `<span class="badge badge-past">Vergangen</span>` : '';
+    const distStr = ev.dist === 0 ? 'in Ostfildern' : `ca. ${ev.dist} km`;
+    const linkEl  = ev.url
+      ? `<a class="card-link" href="${ev.url}" target="_blank" rel="noopener">&#8594; Mehr erfahren</a>`
+      : '';
+    return `
+    <div class="event-card${past ? ' past' : ''}">
+      <div class="card-top">
+        <span class="card-name">${ev.name}</span>
+        <div class="card-badges">
+          <span class="badge badge-${ev.cat}">${CAT_LABEL[ev.cat]}</span>
+          ${statusBadge}
+        </div>
+      </div>
+      <div class="card-dates">${formatRange(ev)}</div>
+      <div class="card-location">${ev.ort}<span class="dist-tag">${distStr}</span></div>
+      <div class="card-desc">${ev.desc}</div>
+      ${linkEl}
+    </div>`;
+  }).join('');
+
+  const total    = EVENTS.length;
+  const upcoming = EVENTS.filter(ev => !isPast(ev)).length;
+  const cats     = new Set(EVENTS.map(e => e.cat)).size;
+  const maxDist  = Math.max(...EVENTS.map(e => e.dist));
+  document.getElementById('hero-stats').innerHTML = `
+    <div class="hero-stat"><div class="hero-stat-val">${total}</div><div class="hero-stat-label">Ereignisse</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">${upcoming}</div><div class="hero-stat-label">Bevorstehend</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">${cats}</div><div class="hero-stat-label">Kategorien</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">${maxDist} km</div><div class="hero-stat-label">Max. Entfernung</div></div>
+  `;
+
+  updateMap(rows);
 }
 
 document.getElementById('search').addEventListener('input', render);
