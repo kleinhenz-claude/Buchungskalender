@@ -157,7 +157,8 @@ def main():
         )
         page = ctx.new_page()
 
-        page.goto(url, wait_until="networkidle", timeout=45000)
+        page.goto(url, wait_until="domcontentloaded", timeout=45000)
+        page.wait_for_timeout(6000)
 
         # Cookie-Banner schließen
         for sel in [
@@ -219,7 +220,8 @@ def main():
                 if disabled in ("true", ""):
                     break
                 next_btn.click()
-                page.wait_for_load_state("networkidle", timeout=20000)
+                page.wait_for_load_state("domcontentloaded", timeout=20000)
+                page.wait_for_timeout(4000)
             except Exception:
                 break
 
