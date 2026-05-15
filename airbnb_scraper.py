@@ -238,4 +238,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    import traceback
+    try:
+        main()
+    except Exception:
+        print("\n!!! FEHLER im Scraper !!!", flush=True)
+        traceback.print_exc()
+        save_csv([])
+        print(f"Leere CSV nach Fehler geschrieben → {OUTFILE}", flush=True)
+        sys.exit(1)

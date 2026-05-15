@@ -44,30 +44,48 @@ jobs:
           playwright install chromium --with-deps
 
       - name: Scraper ausführen
+        id: scraper
+        continue-on-error: true
         run: |
-          python airbnb_scraper.py
+          set +e
+          python airbnb_scraper.py 2>&1 | tee scraper_output.log
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
         env:
           AIRBNB_LOCATION: ${{ github.event.inputs.location }}
           AIRBNB_CHECKIN:  ${{ github.event.inputs.checkin }}
           AIRBNB_CHECKOUT: ${{ github.event.inputs.checkout }}
 
       - name: CSV-Status prüfen
+        if: always()
         run: |
-          echo "--- CSV-Datei ---"
-          ls -la airbnb_ergebnisse.csv || echo "Datei existiert nicht!"
-          echo "--- Inhalt (erste 5 Zeilen) ---"
-          head -n 5 airbnb_ergebnisse.csv || true
-          echo "--- Zeilenanzahl ---"
-          wc -l airbnb_ergebnisse.csv || true
+          echo "==== Scraper Exit-Code: ${{ steps.scraper.outputs.exit_code }} ===="
+          echo ""
+          echo "==== Letzte Zeilen der Scraper-Ausgabe ===="
+          tail -n 30 scraper_output.log 2>/dev/null || echo "Kein Log vorhanden."
+          echo ""
+          echo "==== CSV-Datei ===="
+          if [ -f airbnb_ergebnisse.csv ]; then
+            ls -la airbnb_ergebnisse.csv
+            echo "Zeilen: $(wc -l < airbnb_ergebnisse.csv)"
+            echo "--- Inhalt ---"
+            head -n 10 airbnb_ergebnisse.csv
+          else
+            echo "Datei existiert nicht — erstelle Platzhalter."
+            echo "Titel,Unterzeile,Preis_pro_Nacht,Gesamtpreis,Bewertung,Anzahl_Bewertungen,Superhost,URL" > airbnb_ergebnisse.csv
+          fi
 
       - name: CSV als Artefakt hochladen
+        if: always()
         uses: actions/upload-artifact@v5
         with:
           name: airbnb-ergebnisse
-          path: airbnb_ergebnisse.csv
+          path: |
+            airbnb_ergebnisse.csv
+            scraper_output.log
           retention-days: 30
 
       - name: CSV ins Repository committen
+        if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
