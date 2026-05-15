@@ -556,14 +556,20 @@ function updateStats(rows) {
   ].map(([v,l]) => `<div class="hero-stat"><div class="hero-stat-val">${v}</div><div class="hero-stat-label">${l}</div></div>`).join('');
 }
 
+// Event-Listener immer registrieren (auch nach Datei-Upload nutzbar)
+['search','sort-select','superhost-filter'].forEach(id =>
+  document.getElementById(id).addEventListener('input', render));
+
 document.getElementById('file-input').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
     allRows = parseCSV(ev.target.result);
-    document.getElementById('upload-hint').textContent = `Geladen: ${file.name} · ${allRows.length} Zeile${allRows.length !== 1 ? 'n' : ''}`;
-    document.getElementById('hero-sub').textContent = `${allRows.length} Inserate · ${file.name}`;
+    document.getElementById('upload-hint').textContent =
+      `Geladen: ${file.name} · ${allRows.length} Inserat${allRows.length !== 1 ? 'e' : ''}`;
+    document.getElementById('hero-sub').textContent =
+      `${allRows.length} Inserate · ${file.name}`;
     updateStats(allRows);
     render();
   };
@@ -574,22 +580,25 @@ document.getElementById('file-input').addEventListener('change', e => {
   try {
     allRows = await loadCSV();
     if (!allRows.length) {
-      document.getElementById('hero-sub').textContent = 'Noch keine Daten — Workflow ausführen um CSV zu befüllen.';
+      document.getElementById('hero-sub').textContent = 'CSV geladen — noch keine Daten vorhanden.';
       document.getElementById('hero-stats').innerHTML = '';
-      showState('Die CSV-Datei ist leer. Führe den Airbnb-Scraper-Workflow auf GitHub Actions aus.');
+      showState(`
+        <div class="icon">📭</div>
+        <strong>Die CSV-Datei ist leer.</strong><br><br>
+        Entweder den <strong>Airbnb-Scraper-Workflow</strong> auf GitHub Actions ausführen —<br>
+        oder oben eine lokale CSV-Datei hochladen.
+      `);
       return;
     }
-    const firstRow = allRows[0];
-    const ort = firstRow.Unterzeile || 'Ostfildern-Scharnhausen';
+    const ort = allRows[0].Unterzeile || 'Ostfildern-Scharnhausen';
     document.getElementById('hero-sub').textContent = `${allRows.length} Inserate · ${ort}`;
-    document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
+    document.getElementById('footer').textContent =
+      `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
     updateStats(allRows);
     render();
-    ['search','sort-select','superhost-filter'].forEach(id =>
-      document.getElementById(id).addEventListener('input', render));
   } catch (e) {
     document.getElementById('hero-sub').textContent = 'Fehler beim Laden der CSV.';
-    showState('Fehler: ' + e.message);
+    showState(`<div class="icon">⚠️</div>Fehler: ${e.message}`);
   }
 })();
 </script>
