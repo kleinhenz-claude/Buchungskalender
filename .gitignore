@@ -1,5 +1,5 @@
 node_modules/
 screenshots/
-airbnb_ergebnisse.csv
+# airbnb_ergebnisse.csv  ← wird vom Workflow committed, daher nicht ignorieren
 debug_page.html
 *.png
