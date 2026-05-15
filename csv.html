@@ -404,29 +404,47 @@ async function loadCSV() {
   return parseCSV(text);
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const headers = splitCSVLine(lines[0]);
-  return lines.slice(1).filter(l => l.trim()).map(l => {
-    const vals = splitCSVLine(l);
+function parseCSV(raw) {
+  // BOM entfernen
+  const text = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
+  // RFC 4180-konformer Parser (unterstützt mehrzeilige Felder)
+  const records = [];
+  let i = 0, n = text.length;
+
+  while (i < n) {
+    const fields = [];
+    while (true) {
+      let field = '';
+      if (text[i] === '"') {
+        i++; // öffnendes "
+        while (i < n) {
+          if (text[i] === '"') {
+            if (text[i + 1] === '"') { field += '"'; i += 2; } // escaped quote
+            else { i++; break; } // schließendes "
+          } else { field += text[i++]; }
+        }
+      } else {
+        while (i < n && text[i] !== ',' && text[i] !== '\n' && text[i] !== '\r') {
+          field += text[i++];
+        }
+      }
+      fields.push(field);
+      if (i >= n || text[i] === '\n' || text[i] === '\r') break;
+      i++; // Komma überspringen
+    }
+    // \r\n oder \n überspringen
+    if (text[i] === '\r') i++;
+    if (text[i] === '\n') i++;
+    if (fields.length > 1 || fields[0] !== '') records.push(fields);
+  }
+
+  if (records.length < 2) return [];
+  const headers = records[0];
+  return records.slice(1).map(vals => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = (vals[i] ?? '').trim());
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] ?? '').trim());
     return obj;
   });
-}
-
-function splitCSVLine(line) {
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += c;
-  }
-  result.push(cur);
-  return result;
 }
 
 function parsePrice(str) {
