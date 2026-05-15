@@ -6,8 +6,8 @@
 <title>Termine · Ostfildern &amp; Umgebung</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLEg=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -646,92 +646,6 @@ const CAT_LABEL = {
   sport: 'Sport',
   kultur: 'Kultur'
 };
-
-function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const cat = document.getElementById('cat-filter').value;
-  const time = document.getElementById('time-filter').value;
-
-  let rows = EVENTS.filter(ev => {
-    if (cat && ev.cat !== cat) return false;
-    if (time === 'upcoming' && isPast(ev)) return false;
-    if (time === 'past' && !isPast(ev)) return false;
-    if (q) {
-      const hay = (ev.name + ev.ort + ev.desc + CAT_LABEL[ev.cat]).toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-
-  // sort: active first, then upcoming by start date, then past by start desc
-  rows.sort((a, b) => {
-    const aA = isActive(a), bA = isActive(b);
-    if (aA && !bA) return -1;
-    if (!aA && bA) return 1;
-    const aP = isPast(a), bP = isPast(b);
-    if (!aP && !bP) return parseDate(a.start) - parseDate(b.start);
-    if (aP && bP) return parseDate(b.start) - parseDate(a.start);
-    if (!aP && bP) return -1;
-    return 1;
-  });
-
-  document.getElementById('result-count').textContent =
-    `${rows.length} Termin${rows.length !== 1 ? 'e' : ''}`;
-
-  const grid = document.getElementById('cards-grid');
-  const state = document.getElementById('state-box');
-
-  if (!rows.length) {
-    grid.innerHTML = '';
-    state.style.display = '';
-    state.textContent = 'Keine Ereignisse gefunden.';
-    return;
-  }
-  state.style.display = 'none';
-
-  grid.innerHTML = rows.map(ev => {
-    const past = isPast(ev);
-    const active = isActive(ev);
-    const statusBadge = active
-      ? `<span class="badge badge-upcoming">Läuft jetzt</span>`
-      : past
-      ? `<span class="badge badge-past">Vergangen</span>`
-      : '';
-    const distStr = ev.dist === 0 ? 'in Ostfildern' : `ca. ${ev.dist} km`;
-    const linkEl = ev.url
-      ? `<a class="card-link" href="${ev.url}" target="_blank" rel="noopener">&#8594; Mehr erfahren</a>`
-      : '';
-    return `
-    <div class="event-card${past ? ' past' : ''}">
-      <div class="card-top">
-        <span class="card-name">${ev.name}</span>
-        <div class="card-badges">
-          <span class="badge badge-${ev.cat}">${CAT_LABEL[ev.cat]}</span>
-          ${statusBadge}
-        </div>
-      </div>
-      <div class="card-dates">${formatRange(ev)}</div>
-      <div class="card-location">
-        ${ev.ort}
-        <span class="dist-tag">${distStr}</span>
-      </div>
-      <div class="card-desc">${ev.desc}</div>
-      ${linkEl}
-    </div>`;
-  }).join('');
-
-  // hero stats
-  const total = EVENTS.length;
-  const upcoming = EVENTS.filter(ev => !isPast(ev)).length;
-  const cats = new Set(EVENTS.map(e => e.cat)).size;
-  const maxDist = Math.max(...EVENTS.map(e => e.dist));
-  document.getElementById('hero-stats').innerHTML = `
-    <div class="hero-stat"><div class="hero-stat-val">${total}</div><div class="hero-stat-label">Ereignisse</div></div>
-    <div class="hero-stat"><div class="hero-stat-val">${upcoming}</div><div class="hero-stat-label">Bevorstehend</div></div>
-    <div class="hero-stat"><div class="hero-stat-val">${cats}</div><div class="hero-stat-label">Kategorien</div></div>
-    <div class="hero-stat"><div class="hero-stat-val">${maxDist} km</div><div class="hero-stat-label">Max. Entfernung</div></div>
-  `;
-}
 
 // MAP
 const CAT_COLOR = {
