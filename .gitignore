@@ -1,0 +1,5 @@
+node_modules/
+screenshots/
+airbnb_ergebnisse.csv
+debug_page.html
+*.png
