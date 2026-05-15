@@ -331,39 +331,35 @@ function updateMap(rows) {
     return;
   }
 
-  // Marker um Ostfildern-Zentrum verteilen (kein Geocoding nötig)
   const n = toShow.length;
   toShow.forEach((r, i) => {
-    // Spiralförmige Verteilung damit alle sichtbar und anklickbar sind
     const angle = (i / n) * 2 * Math.PI;
-    const radius = 0.003 + (Math.floor(i / 8) * 0.002);
+    const ring   = Math.floor(i / 10);
+    const radius = 0.004 + ring * 0.003;
     const lat = OSTFILDERN[0] + Math.sin(angle) * radius;
-    const lng = OSTFILDERN[1] + Math.cos(angle) * radius * 1.4;
+    const lng = OSTFILDERN[1] + Math.cos(angle) * radius * 1.5;
 
-    const color = r._superhost ? '#7A9ADE' : '#C4956A';
-    const icon = L.divIcon({
-      className: '',
-      html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;
-        border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);cursor:pointer"></div>`,
-      iconSize: [12, 12], iconAnchor: [6, 6]
-    });
+    const color = r._superhost ? '#4A7ADE' : '#C4956A';
+    const popup =
+      '<b>' + (r._name || '–') + '</b><br>' +
+      (r._location || '') + '<br>' +
+      (r._preis  ? '<b>' + r._preis + '</b><br>' : '') +
+      (r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : '') +
+      (r.URL ? '<a href="' + r.URL + '" target="_blank" rel="noopener">Auf Airbnb →</a>' : '');
 
-    const popup = `
-      <strong>${r._name}</strong><br>
-      ${r._location}<br>
-      ${r._preis ? '<b>' + r._preis + '</b><br>' : ''}
-      ${r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : ''}
-      ${r.URL ? '<a href="' + r.URL + '" target="_blank" rel="noopener">Auf Airbnb ansehen →</a>' : ''}
-    `;
-
-    const marker = L.marker([lat, lng], { icon })
-      .bindPopup(popup)
-      .addTo(markerLayer);
-    markers.push({ marker, row: r });
+    const cm = L.circleMarker([lat, lng], {
+      radius: 7,
+      fillColor: color,
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.9
+    }).bindPopup(popup).addTo(markerLayer);
+    markers.push({ marker: cm, row: r });
   });
 
   map.setView(OSTFILDERN, 14);
-  hint.textContent = `${n} Inserate · Blau = Superhost · Klicken für Details`;
+  hint.textContent = n + ' Inserate · Blau = Superhost · Klicken für Details';
 }
 
 async function loadCSV() {
