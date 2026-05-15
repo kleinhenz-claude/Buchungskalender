@@ -261,7 +261,6 @@ footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center;
   <section class="map-section">
     <h2 class="section-title">Karte</h2>
     <div id="map"></div>
-    <p class="map-hint" id="map-hint">Karte wird geladen …</p>
   </section>
 
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:12px;">
@@ -306,9 +305,8 @@ footer { background: #1C1A16; color: rgba(245,242,236,0.32); text-align: center;
 const CSV_FILE = 'airbnb_ergebnisse.csv';
 let allRows = [], currentView = 'cards';
 
-// Karte: Ostfildern-Scharnhausen
 const OSTFILDERN = [48.7239, 9.2569];
-let map, markers = [], markerLayer;
+let map;
 
 function initMap() {
   map = L.map('map').setView(OSTFILDERN, 13);
@@ -316,50 +314,6 @@ function initMap() {
     attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
     maxZoom: 19
   }).addTo(map);
-  markerLayer = L.layerGroup().addTo(map);
-}
-
-function updateMap(rows) {
-  if (!map) return;
-  markerLayer.clearLayers();
-  markers = [];
-  const hint = document.getElementById('map-hint');
-  const toShow = rows.filter(r => r._isOstfildern);
-
-  if (!toShow.length) {
-    hint.textContent = 'Keine Ostfildern-Inserate zum Anzeigen.';
-    return;
-  }
-
-  const n = toShow.length;
-  toShow.forEach((r, i) => {
-    const angle = (i / n) * 2 * Math.PI;
-    const ring   = Math.floor(i / 10);
-    const radius = 0.004 + ring * 0.003;
-    const lat = OSTFILDERN[0] + Math.sin(angle) * radius;
-    const lng = OSTFILDERN[1] + Math.cos(angle) * radius * 1.5;
-
-    const color = r._superhost ? '#4A7ADE' : '#C4956A';
-    const popup =
-      '<b>' + (r._name || '–') + '</b><br>' +
-      (r._location || '') + '<br>' +
-      (r._preis  ? '<b>' + r._preis + '</b><br>' : '') +
-      (r._superhost ? '<span style="color:#1A3A8B">★ Superhost</span><br>' : '') +
-      (r.URL ? '<a href="' + r.URL + '" target="_blank" rel="noopener">Auf Airbnb →</a>' : '');
-
-    const cm = L.circleMarker([lat, lng], {
-      radius: 7,
-      fillColor: color,
-      color: '#fff',
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0.9
-    }).bindPopup(popup).addTo(markerLayer);
-    markers.push({ marker: cm, row: r });
-  });
-
-  map.setView(OSTFILDERN, 14);
-  hint.textContent = n + ' Inserate · Blau = Superhost · Klicken für Details';
 }
 
 async function loadCSV() {
@@ -566,7 +520,7 @@ document.getElementById('file-input').addEventListener('change', e => {
     document.getElementById('hero-sub').textContent = file.name;
     updateStats(allRows);
     render();
-    updateMap(allRows);
+
   };
   reader.readAsText(file, 'utf-8');
 });
@@ -586,7 +540,7 @@ document.getElementById('file-input').addEventListener('change', e => {
     document.getElementById('footer').textContent = `Airbnb-Scraper · ${new Date().toLocaleDateString('de-DE')}`;
     updateStats(allRows);
     render();
-    updateMap(allRows);
+
   } catch (e) {
     document.getElementById('hero-sub').textContent = 'Fehler beim Laden.';
     showState(`Fehler: ${e.message}`);
